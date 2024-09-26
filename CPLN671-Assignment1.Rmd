@@ -114,9 +114,9 @@ ggplot(data_logged_long, aes(x = value)) +
 
 # scatterplot
 data_processed <- data_logged %>% 
-  dplyr::select(c(LNMEDHVAL, PCTBACHMOR, NBELPOV100, PCTVACANT, PCTSINGLES))
+  dplyr::select(c(LNMEDHVAL, PCTBACHMOR, LNNBELPOV100, PCTVACANT, PCTSINGLES))
   
-data_processed_long <- melt(data_processed, measure.vars = c("PCTBACHMOR", "NBELPOV100", "PCTVACANT", "PCTSINGLES"))
+data_processed_long <- melt(data_processed, measure.vars = c("PCTBACHMOR", "LNNBELPOV100", "PCTVACANT", "PCTSINGLES"))
 
 ggplot(data_processed_long, aes(x = value, y = LNMEDHVAL)) +
   geom_point(color = "steelblue", alpha = 0.6) +
@@ -133,6 +133,72 @@ ggplot(data_processed_long, aes(x = value, y = LNMEDHVAL)) +
 
 ```{r}
 
+# explore multicolinearity using cor and correlation matrix
+
+library(corrplot)
+corr_data <-  data_processed %>% 
+  dplyr::select(c(PCTBACHMOR, PCTVACANT, PCTSINGLES, LNNBELPOV100))
+  
+
+corrplot(cor(corr_data ), method = "number", type = "lower", tl.col = "black", tl.cex = 0.75, number.cex = 1)
+
 ```
+
+
+```{r}
+
+# import the shapefile and create choropleth maps of the following variables LNMEDHVAL 	PCTVACANT    	PCTSINGLES  PCTBACHMOR   LNNBELPOV100
+library(sf)
+philly <- st_read(here("data", "shapefile", "RegressionData.shp"))
+
+```
+
+
+```{r}
+
+ggplot(philly) +
+  geom_sf(aes(fill = LNMEDHVAL), color = NA) +
+  scale_fill_viridis_c(option = "plasma") +
+  labs(title = "Choropleth Map of LNMEDHVAL", fill = "Log Median Value") +
+  theme_minimal()
+
+
+```
+
+
+```{r fig.height=8, fig.width=10}
+
+library(patchwork)
+
+map_pctvacant <- ggplot(philly) +
+  geom_sf(aes(fill = PCTVACANT), color = NA) +
+  scale_fill_viridis_c(option = "plasma") +
+  labs(title = "PCTVACANT", fill = "% Vacant") +
+  theme_minimal()
+
+map_pctsingles <- ggplot(philly) +
+  geom_sf(aes(fill = PCTSINGLES), color = NA) +
+  scale_fill_viridis_c(option = "magma") +
+  labs(title = "PCTSINGLES", fill = "% Singles") +
+  theme_minimal()
+
+map_pcbachmore <- ggplot(philly) +
+  geom_sf(aes(fill = PCTBACHMOR), color = NA) +
+  scale_fill_viridis_c(option = "inferno") +
+  labs(title = "PCTBACHMORE", fill = "% Bachelor’s") +
+  theme_minimal()
+
+map_lnbelpov100 <- ggplot(philly) +
+  geom_sf(aes(fill = LNNBELPOV), color = NA) +
+  scale_fill_viridis_c(option = "cividis") +
+  labs(title = "LNNBELPOV100", fill = "Log Poverty") +
+  theme_minimal()
+
+map_pctvacant + map_pctsingles + map_pcbachmore + map_lnbelpov100 + 
+  plot_layout(ncol = 2)
+
+```
+
+
 
 
