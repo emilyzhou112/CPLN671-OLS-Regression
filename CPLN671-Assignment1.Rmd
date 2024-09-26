@@ -1,0 +1,28 @@
+---
+title: "CPLN671-Assignment1"
+author: "Emily Zhou"
+date: "2024-09-26"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+
+# all the library loaded
+library(tidyverse)
+library(here)
+
+```
+
+
+```{r}
+
+# simply read in data
+data <- read_csv(here("data", "RegressionData.csv"))
+
+```
+
