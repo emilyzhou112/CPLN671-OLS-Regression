@@ -12,6 +12,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 
+options(scipen = 999)
+
 # all the library loaded
 library(tidyverse)
 library(here)
@@ -25,4 +27,33 @@ library(here)
 data <- read_csv(here("data", "RegressionData.csv"))
 
 ```
+
+
+```{r}
+
+# 1a Using the hist, mean, and sd commands in R, examine the distribution of
+# the dependent variable, MEDHVAL, and predictors PCBACHMORE,
+# NBELPOV100, PCTVACANT, and PCTSINGLES, and calculate the mean and
+# standard deviation of each of these variables.
+
+variables <- c("MEDHVAL", "PCTBACHMOR", "NBELPOV100", "PCTVACANT", "PCTSINGLES")
+
+for (var in variables) {
+  # Histogram
+  hist(data[[var]], main = paste("Histogram of", var), xlab = var, col = "grey", border = "black")
+  
+  # Mean and standard deviation
+  mean_val <- mean(data[[var]], na.rm = TRUE)
+  sd_val <- sd(data[[var]], na.rm = TRUE)
+  
+  cat(paste(var, "mean:", mean_val, "\n"))
+  cat(paste(var, "standard deviation:", sd_val, "\n\n"))
+}
+
+
+```
+
+
+
+
 
