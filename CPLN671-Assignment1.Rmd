@@ -31,7 +31,7 @@ data <- read_csv(here("data", "RegressionData.csv"))
 
 ```{r}
 
-# 1a Using the hist, mean, and sd commands in R, examine the distribution of
+# 1. Using the hist, mean, and sd commands in R, examine the distribution of
 # the dependent variable, MEDHVAL, and predictors PCBACHMORE,
 # NBELPOV100, PCTVACANT, and PCTSINGLES, and calculate the mean and
 # standard deviation of each of these variables.
@@ -55,5 +55,84 @@ for (var in variables) {
 
 
 
+```{r}
+
+# alternaitve: better historgam using ggplot
+# Load ggplot2
+library(ggplot2)
+library(reshape2)
+
+# Reshape the dataframe to long format for easy facetting
+data_long <- melt(data, measure.vars = c("MEDHVAL", "PCTBACHMOR", "NBELPOV100", "PCTVACANT", "PCTSINGLES"))
+
+
+# Create scatterplots using facet_wrap
+ggplot(data_long, aes(x = value)) +
+  geom_histogram(aes(y = ..count..), fill = "skyblue", alpha = 0.7) +  
+  facet_wrap(~variable, scales = "free", ncol = 3) +  
+  labs(x = "Value", y = "Count", title = "Histograms with Custom Binning") +
+  theme_minimal() +
+  theme(panel.spacing = unit(2, "lines"))
+
+
+
+
+```
+
+```{r}
+
+# 2. Use the log command to create 5 new variables called LNMEDHVAL, LNPCBACHMORE, LNNBELPOV100, LNPCTVACANT, and LNPCTSINGLES. 
+data_logged<- data %>%
+  mutate(
+    LNMEDHVAL = if (min(MEDHVAL) == 0) log(1 + MEDHVAL) else log(MEDHVAL),
+    LNPCTBACHMOR = if (min(PCTBACHMOR) == 0) log(1 + PCTBACHMOR) else log(PCTBACHMOR),
+    LNNBELPOV100 = if (min(NBELPOV100) == 0) log(1 + NBELPOV100) else log(NBELPOV100),
+    LNPCTVACANT = if (min(PCTVACANT) == 0) log(1 + PCTVACANT) else log(PCTVACANT),
+    LNPCTSINGLES = if (min(PCTSINGLES) == 0) log(1 + PCTSINGLES) else log(PCTSINGLES)
+  )
+
+
+```
+
+
+```{r}
+
+# make histograms of the logged variables
+data_logged_long <- melt(data_logged, measure.vars = c("LNMEDHVAL", "LNPCTBACHMOR", "LNNBELPOV100", "LNPCTVACANT", "LNPCTSINGLES"))
+
+ggplot(data_logged_long, aes(x = value)) +
+ geom_histogram(aes(y = ..count..), fill = "skyblue", alpha = 0.7) +  
+  facet_wrap(~variable, scales = "free", ncol = 3) +  
+  labs(x = "Value", y = "Count", title = "Histograms with Custom Binning") +
+  theme_minimal() +
+  theme(panel.spacing = unit(2, "lines"))
+
+```
+
+
+```{r}
+
+# scatterplot
+data_processed <- data_logged %>% 
+  dplyr::select(c(LNMEDHVAL, PCTBACHMOR, NBELPOV100, PCTVACANT, PCTSINGLES))
+  
+data_processed_long <- melt(data_processed, measure.vars = c("PCTBACHMOR", "NBELPOV100", "PCTVACANT", "PCTSINGLES"))
+
+ggplot(data_processed_long, aes(x = value, y = LNMEDHVAL)) +
+  geom_point(color = "steelblue", alpha = 0.6) +
+  geom_smooth(method = "lm", color = "red", se = FALSE) +  # Add a linear regression line
+  facet_wrap(~ variable, scales = "free") +
+  theme_minimal() +
+  labs(title = "Scatter Plots of Dependent Variable vs. Predictors", 
+       x = "Predictor Value", 
+       y = "Log of Median Value (LNMEDHVAL)")
+
+```
+
+
+
+```{r}
+
+```
 
 
