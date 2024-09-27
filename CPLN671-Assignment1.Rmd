@@ -114,7 +114,7 @@ ggplot(data_logged_long, aes(x = value)) +
 
 # scatterplot
 data_processed <- data_logged %>% 
-  dplyr::select(c(LNMEDHVAL, PCTBACHMOR, LNNBELPOV100, PCTVACANT, PCTSINGLES))
+  dplyr::select(c(POLY_ID, LNMEDHVAL, PCTBACHMOR, LNNBELPOV100, PCTVACANT, PCTSINGLES))
   
 data_processed_long <- melt(data_processed, measure.vars = c("PCTBACHMOR", "LNNBELPOV100", "PCTVACANT", "PCTSINGLES"))
 
@@ -276,8 +276,62 @@ stepwise_model
 
 stepwise_model$anova
 
+```
+
+```{r}
+library(caret)
+#rmse for full model
+lm_1 = trainControl(method = "cv", number = 5)
+
+cvlm_model = train(LNMEDHVAL ~ PCTVACANT + PCTSINGLES + PCTBACHMOR + LNNBELPOV100, data=data_processed, method = "lm", trControl = lm_1)
+
+print(cvlm_model)
+
+```
+
+```{r}
+
+cvlm_model_reduced = train(LNMEDHVAL ~ PCTVACANT + MEDHHINC, data = data_logged, method = "lm", trControl = lm_1)
+
+print(cvlm_model_reduced)
+```
+
+
+```{r}
+
+ggplot(lm_data, aes(x = Standardized_Residuals)) +
+  geom_histogram(bins = 30, fill = "blue", color = "black", alpha = 0.7) +
+  labs(title = "Histogram of Standardized Residuals", 
+       x = "Standardized Residuals", 
+       y = "Frequency") +
+  theme_minimal()
+
+
 
 
 ```
 
+
+
+```{r}
+
+lm_data <- philly %>%
+  left_join(lm_data %>% dplyr::select(c(POLY_ID, Standardized_Residuals)), by = "POLY_ID") 
+
+ggplot(lm_data) +
+  geom_sf(aes(fill = Standardized_Residuals)) +  # Use geom_sf to map the polygons
+  scale_fill_viridis_c(option = "C", direction = -1) +  # Choose a color palette, invert direction if needed
+  theme_minimal() +  # Clean map style
+  labs(
+    title = "Choropleth Map of Standardized Residuals",
+    fill = "Std Residuals"
+  ) +
+  theme(
+    legend.position = "right",  # Position the legend
+    plot.title = element_text(hjust = 0.5, size = 16)  # Center title
+  )
+
+
+
+```
 
