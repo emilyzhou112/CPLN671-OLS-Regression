@@ -266,11 +266,18 @@ ggplot(lm_data, aes(x = Fitted, y = Standardized_Residuals)) +
 
 ```{r}
 
+library(MASS)
+stepwise_model <-  stepAIC(fit, direction = "both")
+stepwise_model
 
+```
 
+```{r}
 
+stepwise_model$anova
 
 
 
 ```
+
 
