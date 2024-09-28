@@ -1,8 +1,17 @@
 ---
-title: "CPLN671-Assignment1"
-author: "Emily Zhou"
-date: "2024-09-26"
-output: html_document
+title: "Using OLS Regression to Predict Median House Values in Philadelphia"
+author: "Emily, Ziyi, Emma"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    theme: simplex
+    toc: yes
+    toc_float: yes
+    code_folding: hide
+    code_download: yes
+editor_options:
+  markdown:
+    wrap: sentence
 ---
 
 ```{r setup, include=FALSE}
@@ -12,7 +21,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
-```{r libraries, message=FALSE, warning=FALSE}
+```{r libraries, message=FALSE, warning=FALSE, include=FALSE}
 
 options(scipen = 999)
 
@@ -24,6 +33,8 @@ library(ggplot2)
 library(ggcorrplot)
 library(sf)
 library(patchwork)
+library(MASS)
+library(caret)
 
 ```
 
@@ -35,6 +46,64 @@ data <- read_csv(here("data", "RegressionData.csv"))
 
 ```
 
+
+# Introduction 
+
+a)	State the problem and the setting of the analysis (i.e., Philadelphia).
+b)  Present either a brief review of the literature (use Google Scholar) or simply speculate as to why the predictors we are using might be related with the response variable.
+
+# Methods
+
+
+## Data Cleaning 
+
+Simply state that the original dataset had 1816 observations (i.e., block groups) and was cleaned in order to achieve a dataset with 1720 observations (that is, basically include the information about data cleaning that is on the very the first page of this assignment).
+
+Note that the original Philadelphia block group dataset has 1816 observations. We clean the data by removing the following block groups: 
+
+- Block groups where population < 40
+- Block groups where there are no housing units
+- Block groups where the median house value is lower than $10,000
+- One North Philadelphia block group which had a very high median house value (over 800,000) and a very low median household income (less than 8,000)
+
+## Exploratory Data Analysis
+
+State that you will examine the summary statistics and distributions of variables.
+Also state that as part of your exploratory data analysis, you will examine the correlations between the predictors.  
+Explain what a correlation is, and provide the formula for the sample correlation coefficient r. Also mention the possible range of r values, and what correlation of 0 means.
+
+## Multiple Regression Analysis
+
+Describe the method of regression in several sentences. What is it used for, what does it do?
+
+State the equation for y for this problem. The equation should be in the form: by=β_0+β_1 x_1+⋯+β_k x_k+ε. 
+However, in your report, instead of y and x1…xk, fill in the actual variable names (as in the regression example given above). Be sure to mention what βi’s and ε are as well. If the variables are log transformed, be sure to indicate that in the formulas.
+
+State and explain regression assumptions (e.g., linearity; independence of observations; normality of residuals; homoscedasticity; no multicollinearity).
+
+Mention the parameters that need to be estimated in multiple regression (σ2, β0 ,…, βk). State what σ2 is (you should have already talked about βi in (ii) above). 
+
+Talk about the way of estimating the parameters. (Hint: present the equation on the slide ‘β Coefficient Estimation – Least Squares’ for multiple regression and briefly discuss what the equation does).
+
+Talk about the coefficient of multiple determination R2, and the adjusted R2. Present and explain the relevant formulas and all the terms that are used in the formulas.
+
+State the hypotheses you test. Specifically, talk about the F-ratio and the H0 and Ha associated with it, as well as the hypotheses you test about each of the individual βi’s (again, state H0 and Ha).
+
+## Additional Analyses
+
+Talk about stepwise regression – discuss what it does and its limitations
+
+Talk about k-fold cross-validation (mentioning that k = 5) – discuss what it is used for, describe how it is operationalized and mention that the RMSE is used to compare models (explain what the RMSE is and how it is calculated, presenting and describing any relevant formulas).
+
+## Software and Pacakges
+
+State that you’re using R for your data analysis.
+
+# Results
+
+## Exploratory Results
+
+Present and briefly talk about the table with summary statistics which includes the dependent variable and the predictors (i.e., mean, standard deviation).
 
 ```{r mean and sd, message=FALSE, warning=FALSE}
 
@@ -77,6 +146,10 @@ dist_results %>%
 ```
 
 
+Also state whether the variables are normal before and after the logarithmic transformation. 
+Present the histograms of the original variables alongside the histograms of the log-transformed variables, and clearly state whether you’re using the log-transformed or original variable in your regression. 
+State that the other regression assumptions will be examined in a separate section below (Regression Assumption Checks).
+
 
 ```{r histograms, fig.height=7, fig.width=9, message=FALSE, warning=FALSE}
 
@@ -96,8 +169,12 @@ data %>%
     "PCTSINGLES" = "% of Single House Units"
   ))) +  
   labs(x = "Value", y = "Count", title = "Histograms of Dependent and Predictor Variables") +
-  theme_minimal() +
-  theme(panel.spacing = unit(2, "lines"))
+  theme_light() +   
+  theme(plot.subtitle = element_text(size = 9,face = "italic"),
+        plot.title = element_text(size = 12, face = "bold"), 
+        axis.text.x=element_text(size=6),
+        axis.text.y=element_text(size=6), 
+        axis.title=element_text(size=8))
 
 
 
@@ -139,37 +216,17 @@ reg_data %>%
     "LNPCTSINGLES" = "% of Single House Units"
   ))) +  
   labs(x = "Value", y = "Count", title = "Histograms with Logged Transform Variables") +
-  theme_minimal() +
-  theme(panel.spacing = unit(2, "lines"))
+  theme_light() +   
+  theme(plot.subtitle = element_text(size = 9,face = "italic"),
+        plot.title = element_text(size = 12, face = "bold"), 
+        axis.text.x=element_text(size=6),
+        axis.text.y=element_text(size=6), 
+        axis.title=element_text(size=8))
 
 ```
 
 
-```{r scatterplot, fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
-
-# scatterplot
-
-reg_data %>%
-  pivot_longer(cols = c("PCTBACHMOR", "LNNBELPOV100", "PCTVACANT", "PCTSINGLES"),
-               names_to = "Variable",
-               values_to = "Value") %>% 
-ggplot(aes(x = Value, y = LNMEDHVAL)) +
-  geom_point(color = "#283d3b", alpha = 0.7, size = 0.4) +
-  geom_smooth(method = "lm", color = "#c44536", se = FALSE) +  # Add a linear regression line
-  facet_wrap(~ Variable, scales = "free", labeller = as_labeller(c(
-    "LNMEDHVAL" = "Log of Median House Value",
-    "PCTBACHMOR" = "% with Bachelor’s Degrees or Higher",
-    "NBELPOV100" = "Households Living in Poverty",
-    "PCTVACANT" = "% of Vacant Houses",
-    "PCTSINGLES" = "% of Single House Units"
-  )))  +
-  theme_minimal() +
-  labs(title = "Scatter Plots of Dependent Variable vs. Predictors", 
-       x = "Predictor Value", 
-       y = "Log of Median House Value")
-
-```
-
+Present the correlation matrix of the predictors which you obtained from R. Talk about whether the correlation matrix shows that there is severe multicollinearity. Does the correlation matrix support your conclusions based on your visual comparison of predictor maps?
 
 ```{r corr plot, message=FALSE, warning=FALSE}
 
@@ -180,7 +237,7 @@ custom_labels <- c(
   "# Households Living in Poverty" = "LNNBELPOV100"
 )
 
-cor_matrix <- cor(reg_data %>% select(PCTBACHMOR, PCTVACANT, PCTSINGLES, LNNBELPOV100))
+cor_matrix <- cor(reg_data %>% dplyr::select(PCTBACHMOR, PCTVACANT, PCTSINGLES, LNNBELPOV100))
 rownames(cor_matrix) <- names(custom_labels)
 colnames(cor_matrix) <- names(custom_labels)
 
@@ -197,9 +254,9 @@ ggcorrplot(cor_matrix,
         axis.title = element_text(size = 8))
 ```
 
+Present the choropleth maps of the dependent variable and the predictors. Refer to the maps in the text, and talk about the following: Which maps look similar? Which maps look different? That is, which predictors do you expect to be strongly associated with the dependent variable based on the visualization? Also, given your examination of the maps, are there any predictors that you think will be strongly inter-correlated? That is, do you expect severe multicollinearity to be an issue here? Discuss this in a paragraph. 
 
-
-```{r choropleth }
+```{r choropleth, message=FALSE, warning=FALSE}
 
 # choropleth maps of predictor and dependent variables
 philly <- st_read(here("data", "shapefile", "RegressionData.shp"))
@@ -222,7 +279,7 @@ ggplot(philly) +
 
 ```
 
-```{r more choropleth, fig.height=8, fig.width=11, message=FALSE, warning=FALSE}
+```{r more choropleth, fig.height=11, fig.width=14, message=FALSE, warning=FALSE}
 
 map_pctvacant <- ggplot(philly) +
   geom_sf(aes(fill = PCTVACANT), color = "transparent") +
@@ -297,142 +354,198 @@ map_pctvacant + map_pctsingles + map_pcbachmore + map_lnbelpov100 +
   plot_layout(ncol = 2)
 ```
 
+## Regression Results
 
+Present the regression output from R. Be sure that your output presents the parameter estimates (and associated standard errors, t-statistics and p-values), as well as the R2, the adjusted R2, and the relevant F-ratio and associated p-value.
 
+Referencing the regression output in (i) above, interpret the results as in the example included above this report outline.
 
-
-```{r}
-
-# use the lm command to run the regression where LNMEDHVAL is the dependent variable and PCTVACANT, PCTSINGLES, PCTBACHMOR, and LNNBELPOV100 are predictors
+```{r linear regression, message=FALSE, warning=FALSE}
 
 fit <- lm(LNMEDHVAL ~ PCTVACANT + PCTSINGLES + PCTBACHMOR + LNNBELPOV100, data=reg_data)
 summary(fit)
-
 ```
-
-
-```{r}
-
+```{r anova table, message=FALSE, warning=FALSE}
 
 anova_table <- anova(fit)
 anova_table
 
 ```
 
-```{r}
 
-error_sum_squares <- anova_table["Residuals", "Sum Sq"]
-error_sum_squares
+## Regression Assumption Check
+
+First state that in this section, you will be talking about testing model assumptions. State that you have already looked at the variable distributions earlier.
+
+Present scatter plots of the dependent variable and each of the predictors.  State whether each of the relationships seems to be linear, as assumed by the regression model. [Hint: they will not look linear.]
+
+```{r scatterplot, fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
+
+# scatterplot
+
+reg_data %>%
+  pivot_longer(cols = c("PCTBACHMOR", "LNNBELPOV100", "PCTVACANT", "PCTSINGLES"),
+               names_to = "Variable",
+               values_to = "Value") %>% 
+ggplot(aes(x = Value, y = LNMEDHVAL)) +
+  geom_point(color = "#283d3b", alpha = 0.7, size = 0.4) +
+  geom_smooth(method = "lm", color = "#c44536", se = FALSE) +  # Add a linear regression line
+  facet_wrap(~ Variable, scales = "free", labeller = as_labeller(c(
+    "PCTBACHMOR" = "% with Bachelor’s Degrees or Higher",
+    "LNNBELPOV100" = "Households Living in Poverty",
+    "PCTVACANT" = "% of Vacant Houses",
+    "PCTSINGLES" = "% of Single House Units"
+  )))  +
+  theme_light() +   
+  theme(plot.subtitle = element_text(size = 9,face = "italic"),
+        plot.title = element_text(size = 12, face = "bold"), 
+        axis.text.x=element_text(size=6),
+        axis.text.y=element_text(size=6), 
+        axis.title=element_text(size=8)) +
+  labs(title = "Scatter Plots of Dependent Variable vs. Predictors", 
+       x = "Predictor Value", 
+       y = "Log of Median House Value")
 
 ```
 
+Present the histogram of the standardized residuals. State whether the residuals look normal.
 
-
-```{r}
-
-# Use the fitted, residuals and rstandard commands to save the predicted values, residuals and standardized residuals, respectively. 
+```{r compute residuals, message=FALSE, warning=FALSE}
 
 fitted_values <- fitted(fit)
 residuals_values <- residuals(fit)
 standardized_residuals <- rstandard(fit)
 
-lm_data <- data_processed %>%
+reg_data <- reg_data %>%
   mutate(
     Fitted = fitted_values,
     Residuals = residuals_values,
-    Standardized_Residuals = standardized_residuals
-  )
-
-lm_data
+    Standardized_Residuals = standardized_residuals)
 
 ```
 
 
-```{r}
+```{r residual histograms, message=FALSE, warning=FALSE}
 
-ggplot(lm_data, aes(x = Fitted, y = Standardized_Residuals)) +
-  geom_point(color = 'blue', alpha = 0.6) +    # Scatter plot points
-  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +   # Add a horizontal line at y = 0
+ggplot(reg_data, aes(x = Standardized_Residuals)) +
+  geom_histogram(bins = 30, fill = "#283d3b", alpha = 0.7) +
+  labs(title = "Histogram of Standardized Residuals", 
+       x = "Standardized Residuals", 
+       y = "Frequency") +
+  theme_light() +   
+  theme(plot.subtitle = element_text(size = 9,face = "italic"),
+        plot.title = element_text(size = 12, face = "bold"), 
+        axis.text.x=element_text(size=6),
+        axis.text.y=element_text(size=6), 
+        axis.title=element_text(size=8))
+
+```
+
+
+Present the ‘Standardized Residual by Predicted Value’ scatter plot. What conclusions can you draw from that? Does there seem to be heteroscedasticity? Do there seem to be outliers? Anything else? Discuss. 
+Mention what standardized residuals are.
+
+```{r residual plot,  message=FALSE, warning=FALSE}
+
+ggplot(reg_data, aes(x = Fitted, y = Standardized_Residuals)) +
+  geom_point(color = "#283d3b", alpha = 0.6) +    # Scatter plot points
+  geom_hline(yintercept = 0, linetype = "dashed", color = "#c44536") +   # Add a horizontal line at y = 0
   labs(
     title = "Scatter Plot of Standardized Residuals vs Fitted Values",
     x = "Fitted Values",
     y = "Standardized Residuals"
   ) +
-  theme_minimal() 
+  theme_light() +   
+  theme(plot.subtitle = element_text(size = 9,face = "italic"),
+        plot.title = element_text(size = 12, face = "bold"), 
+        axis.text.x=element_text(size=6),
+        axis.text.y=element_text(size=6), 
+        axis.title=element_text(size=8))
 
 
 ```
 
+Referencing the maps of the dependent variable and the predictors that you presented earlier, state whether there seems to be spatial autocorrelation in your variables. That is, does it seem that the observations (i.e., block groups) are independent of each other? Briefly discuss.
+
+Now, present the choropleth map of the standardized regression residuals. Do there seem to be any noticeable spatial patterns in them? That is, do they seem to be spatially autocorrelated? You will examine the spatial autocorrelation of the variables and residuals and run spatial regressions in the next assignment. 
+
+```{r residual maps, message=FALSE, warning=FALSE}
+
+philly %>%
+  left_join(reg_data %>% dplyr::select(c(POLY_ID, Standardized_Residuals)), by = "POLY_ID") %>% 
+  ggplot(.) +
+  geom_sf(aes(fill = Standardized_Residuals), color = "transparent") +  # Use geom_sf to map the polygons
+  scale_fill_gradientn(colors = c("#FAF9F6", "#c44536"), 
+                       name = "Std Residuals", 
+                       na.value = "transparent") +  # Choose a color palette, invert direction if needed
+  labs(title = "Choropleth Map of Standardized Residuals") +
+  theme(legend.text = element_text(size = 9),
+        legend.title = element_text(size = 10),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        plot.subtitle = element_text(size = 9, face = "italic"),
+        plot.title = element_text(size = 12, face = "bold"),
+        panel.background = element_blank(),
+        panel.border = element_rect(colour = "grey", fill = NA, size = 0.8))
 
 
-```{r}
 
-library(MASS)
+```
+
+## Additional Analyses
+
+
+Present the results of the stepwise regression and state whether all 4 predictors in the original model are kept in the final model.
+
+```{r stepwise regression, message=FALSE, warning=FALSE}
+
 stepwise_model <-  stepAIC(fit, direction = "both")
-stepwise_model
-
-```
-
-```{r}
-
 stepwise_model$anova
 
 ```
 
-```{r}
-library(caret)
-#rmse for full model
-lm_1 = trainControl(method = "cv", number = 5)
+Present the cross-validation results – that is, compare the RMSE of the original model that includes all 4 predictors with the RMSE of the model that only includes PCTVACANT and MEDHHINC as predictors.
 
-cvlm_model = train(LNMEDHVAL ~ PCTVACANT + PCTSINGLES + PCTBACHMOR + LNNBELPOV100, data=data_processed, method = "lm", trControl = lm_1)
+```{r cross validation, message=FALSE, warning = FALSE}
+
+lm <-  trainControl(method = "cv", number = 5)
+
+cvlm_model <- train(LNMEDHVAL ~ PCTVACANT + PCTSINGLES + PCTBACHMOR + LNNBELPOV100, data=reg_data, method = "lm", trControl = lm)
 
 print(cvlm_model)
 
 ```
 
-```{r}
+```{r reduce cv model,message=FALSE, warning=FALSE}
 
-cvlm_model_reduced = train(LNMEDHVAL ~ PCTVACANT + MEDHHINC, data = data_logged, method = "lm", trControl = lm_1)
+cvlm_model_reduced = train(LNMEDHVAL ~ PCTVACANT + MEDHHINC, data = reg_data, method = "lm", trControl = lm)
 
 print(cvlm_model_reduced)
 ```
 
+# Discussion and Limitations
 
-```{r}
-
-ggplot(lm_data, aes(x = Standardized_Residuals)) +
-  geom_histogram(bins = 30, fill = "blue", color = "black", alpha = 0.7) +
-  labs(title = "Histogram of Standardized Residuals", 
-       x = "Standardized Residuals", 
-       y = "Frequency") +
-  theme_minimal()
+a)	Recap what you did in the paper and your findings. Discuss what conclusions you can draw, which variables were significant and whether that was surprising or not.
 
 
+b)	Talk about the quality of the model – that is, state if this is a good model overall (e.g., R2, F-ratio test), and what other predictors that we didn’t include in our model might be associated with our dependent variable.
+Looking at the stepwise regression results, did the final model include all 4 predictors or were some dropped? What does that tell you about the quality of the model? 
+Looking at the cross-validation results, was the RMSE better for the 4 predictor model or the 2 predictor model?  
 
 
-```
+c)	If you haven’t done that in the Results section, talk explicitly about the limitations of the model – that is, mention which assumptions were violated, and if applicable, how that may affect the model/parameter estimation/estimated significance. 
+In addition, talk about the limitations of using the NBELPOV100 variable as a predictor – that is, what are some limitations of using the raw number of households living in poverty rather than a percentage?
 
 
-
-```{r}
-
-lm_data <- philly %>%
-  left_join(lm_data %>% dplyr::select(c(POLY_ID, Standardized_Residuals)), by = "POLY_ID") 
-
-ggplot(lm_data) +
-  geom_sf(aes(fill = Standardized_Residuals)) +  # Use geom_sf to map the polygons
-  scale_fill_viridis_c(option = "C", direction = -1) +  # Choose a color palette, invert direction if needed
-  theme_minimal() +  # Clean map style
-  labs(
-    title = "Choropleth Map of Standardized Residuals",
-    fill = "Std Residuals"
-  ) +
-  theme(
-    legend.position = "right",  # Position the legend
-    plot.title = element_text(hjust = 0.5, size = 16)  # Center title
-  )
+d)	Would it make sense to run Ridge or LASSO regression here? Explain briefly (~4-5 sentences) what these methods are, when they’re used, and why they would or would not be appropriate here.
 
 
 
-```
+
+
+
+
+
 
