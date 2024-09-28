@@ -6,71 +6,96 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
+
 knitr::opts_chunk$set(echo = TRUE)
+
 ```
 
 
-```{r}
+```{r libraries, message=FALSE, warning=FALSE}
 
 options(scipen = 999)
 
 # all the library loaded
 library(tidyverse)
 library(here)
+library(kableExtra)
+library(ggplot2)
+library(ggcorrplot)
+library(sf)
+library(patchwork)
 
 ```
 
 
-```{r}
+```{r read data, message=FALSE, warning=FALSE, include=FALSE}
 
-# simply read in data
+# read in data
 data <- read_csv(here("data", "RegressionData.csv"))
 
 ```
 
 
-```{r}
+```{r mean and sd, message=FALSE, warning=FALSE}
 
-# 1. Using the hist, mean, and sd commands in R, examine the distribution of
-# the dependent variable, MEDHVAL, and predictors PCBACHMORE,
-# NBELPOV100, PCTVACANT, and PCTSINGLES, and calculate the mean and
-# standard deviation of each of these variables.
-
+# examine the mean and standard deviation of dependent and independent variables. 
+dist_results <- data.frame(Variable = character(), Mean = numeric(), SD = numeric(), stringsAsFactors = FALSE)
 variables <- c("MEDHVAL", "PCTBACHMOR", "NBELPOV100", "PCTVACANT", "PCTSINGLES")
+relabelled_variables <- c(
+  "Median House Value",                                    # MEDHVAL
+  "% of Individuals with Bachelor’s Degrees or Higher",    # PCTBACHMOR
+  "# Households Living in Poverty",                        # NBELPOV100
+  "% of Vacant Houses",                                    # PCTVACANT
+  "% of Single House Units"                                # PCTSINGLES
+)
 
-for (var in variables) {
-  # Histogram
-  hist(data[[var]], main = paste("Histogram of", var), xlab = var, col = "grey", border = "black")
+for (i in seq_along(variables)) {
   
-  # Mean and standard deviation
-  mean_val <- mean(data[[var]], na.rm = TRUE)
-  sd_val <- sd(data[[var]], na.rm = TRUE)
+  mean_val <- round(mean(data[[variables[i]]], na.rm = TRUE), 3) 
+  sd_val <- round(sd(data[[variables[i]]], na.rm = TRUE), 3) 
   
-  cat(paste(var, "mean:", mean_val, "\n"))
-  cat(paste(var, "standard deviation:", sd_val, "\n\n"))
+  # Store the relabeled variable names
+  dist_results <- rbind(dist_results, data.frame(Variable = relabelled_variables[i], Mean = mean_val, SD = sd_val))
 }
+
+
+dist_results <- rbind(
+  data.frame(Variable = "Dependent Variable", Mean = "", SD = ""),
+  data.frame(Variable = "Median House Value", Mean = dist_results$Mean[1], SD = dist_results$SD[1]),
+  data.frame(Variable = "Predictors", Mean = "", SD = ""),
+  dist_results[-1, ] # Remove the first row because it has already been used above
+)
+
+dist_results %>%  
+  kable(row.names = FALSE) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>% 
+  row_spec(0, bold = TRUE) %>%  # Bold the header row
+  row_spec(1, bold = TRUE) %>%  # Bold the 'Dependent Variable' row
+  row_spec(3, bold = TRUE)
 
 
 ```
 
 
 
-```{r}
+```{r histograms, fig.height=7, fig.width=9, message=FALSE, warning=FALSE}
 
-# alternaitve: better historgam using ggplot
-# Load ggplot2
-library(ggplot2)
-library(reshape2)
+# histogram
 
-# Reshape the dataframe to long format for easy facetting
-data_long <- melt(data, measure.vars = c("MEDHVAL", "PCTBACHMOR", "NBELPOV100", "PCTVACANT", "PCTSINGLES"))
-
-
-# Create scatterplots using facet_wrap
-ggplot(data_long, aes(x = value)) +
-  geom_histogram(aes(y = ..count..), fill = "skyblue", alpha = 0.7) +  
-  facet_wrap(~variable, scales = "free", ncol = 3) +  
-  labs(x = "Value", y = "Count", title = "Histograms with Custom Binning") +
+data %>%
+  pivot_longer(cols = c("MEDHVAL", "PCTBACHMOR", "NBELPOV100", "PCTVACANT", "PCTSINGLES"),
+               names_to = "Variable",
+               values_to = "Value") %>% 
+  ggplot(aes(x = Value)) +
+  geom_histogram(aes(y = ..count..), fill = "#283d3b", alpha = 0.7) +  
+  facet_wrap(~Variable, scales = "free", ncol = 3, labeller = as_labeller(c(
+    "MEDHVAL" = "Median House Value",
+    "PCTBACHMOR" = "% with Bachelor’s Degrees or Higher",
+    "NBELPOV100" = "# Households Living in Poverty",
+    "PCTVACANT" = "% of Vacant Houses",
+    "PCTSINGLES" = "% of Single House Units"
+  ))) +  
+  labs(x = "Value", y = "Count", title = "Histograms of Dependent and Predictor Variables") +
   theme_minimal() +
   theme(panel.spacing = unit(2, "lines"))
 
@@ -79,10 +104,13 @@ ggplot(data_long, aes(x = value)) +
 
 ```
 
-```{r}
 
-# 2. Use the log command to create 5 new variables called LNMEDHVAL, LNPCBACHMORE, LNNBELPOV100, LNPCTVACANT, and LNPCTSINGLES. 
-data_logged<- data %>%
+
+```{r log variables, message=FALSE, warning=FALSE}
+
+# log the variables
+
+reg_data <- data %>%
   mutate(
     LNMEDHVAL = if (min(MEDHVAL) == 0) log(1 + MEDHVAL) else log(MEDHVAL),
     LNPCTBACHMOR = if (min(PCTBACHMOR) == 0) log(1 + PCTBACHMOR) else log(PCTBACHMOR),
@@ -91,120 +119,193 @@ data_logged<- data %>%
     LNPCTSINGLES = if (min(PCTSINGLES) == 0) log(1 + PCTSINGLES) else log(PCTSINGLES)
   )
 
-
 ```
 
 
-```{r}
+```{r logged histograms, fig.height=7, fig.width=9, message=FALSE, warning=FALSE}
 
-# make histograms of the logged variables
-data_logged_long <- melt(data_logged, measure.vars = c("LNMEDHVAL", "LNPCTBACHMOR", "LNNBELPOV100", "LNPCTVACANT", "LNPCTSINGLES"))
-
-ggplot(data_logged_long, aes(x = value)) +
- geom_histogram(aes(y = ..count..), fill = "skyblue", alpha = 0.7) +  
-  facet_wrap(~variable, scales = "free", ncol = 3) +  
-  labs(x = "Value", y = "Count", title = "Histograms with Custom Binning") +
+# histograms of the logged variables
+reg_data %>%
+  pivot_longer(cols = c("LNMEDHVAL", "LNPCTBACHMOR", "LNNBELPOV100", "LNPCTVACANT", "LNPCTSINGLES"),
+               names_to = "Variable",
+               values_to = "Value") %>% 
+  ggplot(aes(x = Value)) +
+  geom_histogram(aes(y = ..count..), fill = "#283d3b", alpha = 0.7) +  
+  facet_wrap(~Variable, scales = "free", ncol = 3, labeller = as_labeller(c(
+    "LNMEDHVAL" = "Median House Value",
+    "LNPCTBACHMOR" = "% with Bachelor’s Degrees or Higher",
+    "LNNBELPOV100" = "# Households Living in Poverty",
+    "LNPCTVACANT" = "% of Vacant Houses",
+    "LNPCTSINGLES" = "% of Single House Units"
+  ))) +  
+  labs(x = "Value", y = "Count", title = "Histograms with Logged Transform Variables") +
   theme_minimal() +
   theme(panel.spacing = unit(2, "lines"))
 
 ```
 
 
-```{r}
+```{r scatterplot, fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
 
 # scatterplot
-data_processed <- data_logged %>% 
-  dplyr::select(c(POLY_ID, LNMEDHVAL, PCTBACHMOR, LNNBELPOV100, PCTVACANT, PCTSINGLES))
-  
-data_processed_long <- melt(data_processed, measure.vars = c("PCTBACHMOR", "LNNBELPOV100", "PCTVACANT", "PCTSINGLES"))
 
-ggplot(data_processed_long, aes(x = value, y = LNMEDHVAL)) +
-  geom_point(color = "steelblue", alpha = 0.6) +
-  geom_smooth(method = "lm", color = "red", se = FALSE) +  # Add a linear regression line
-  facet_wrap(~ variable, scales = "free") +
+reg_data %>%
+  pivot_longer(cols = c("PCTBACHMOR", "LNNBELPOV100", "PCTVACANT", "PCTSINGLES"),
+               names_to = "Variable",
+               values_to = "Value") %>% 
+ggplot(aes(x = Value, y = LNMEDHVAL)) +
+  geom_point(color = "#283d3b", alpha = 0.7, size = 0.4) +
+  geom_smooth(method = "lm", color = "#c44536", se = FALSE) +  # Add a linear regression line
+  facet_wrap(~ Variable, scales = "free", labeller = as_labeller(c(
+    "LNMEDHVAL" = "Log of Median House Value",
+    "PCTBACHMOR" = "% with Bachelor’s Degrees or Higher",
+    "NBELPOV100" = "Households Living in Poverty",
+    "PCTVACANT" = "% of Vacant Houses",
+    "PCTSINGLES" = "% of Single House Units"
+  )))  +
   theme_minimal() +
   labs(title = "Scatter Plots of Dependent Variable vs. Predictors", 
        x = "Predictor Value", 
-       y = "Log of Median Value (LNMEDHVAL)")
+       y = "Log of Median House Value")
 
 ```
 
 
+```{r corr plot, message=FALSE, warning=FALSE}
 
-```{r}
+custom_labels <- c(
+  "% of Individuals with Bachelor’s Degrees or Higher" = "PCTBACHMOR",
+  "% of Vacant Houses" = "PCTVACANT",
+  "% of Single House Units" = "PCTSINGLES",
+  "# Households Living in Poverty" = "LNNBELPOV100"
+)
 
-# explore multicolinearity using cor and correlation matrix
+cor_matrix <- cor(reg_data %>% select(PCTBACHMOR, PCTVACANT, PCTSINGLES, LNNBELPOV100))
+rownames(cor_matrix) <- names(custom_labels)
+colnames(cor_matrix) <- names(custom_labels)
 
-library(corrplot)
-corr_data <-  data_processed %>% 
-  dplyr::select(c(PCTBACHMOR, PCTVACANT, PCTSINGLES, LNNBELPOV100))
-  
-
-corrplot(cor(corr_data ), method = "number", type = "lower", tl.col = "black", tl.cex = 0.75, number.cex = 1)
-
+ggcorrplot(cor_matrix, 
+           type = "lower", 
+           lab = TRUE, 
+           lab_size = 3, 
+           colors = c("#283d3b", "white", "#c44536")) +
+  labs(title = "Correlation Matrix for all Predictor Variables") +
+  theme(plot.subtitle = element_text(size = 9, face = "italic"),
+        plot.title = element_text(size = 12, face = "bold"), 
+        axis.text.x = element_text(size = 7),
+        axis.text.y = element_text(size = 7), 
+        axis.title = element_text(size = 8))
 ```
 
 
-```{r}
 
-# import the shapefile and create choropleth maps of the following variables LNMEDHVAL 	PCTVACANT    	PCTSINGLES  PCTBACHMOR   LNNBELPOV100
-library(sf)
+```{r choropleth }
+
+# choropleth maps of predictor and dependent variables
 philly <- st_read(here("data", "shapefile", "RegressionData.shp"))
-
-```
-
-
-```{r}
-
 ggplot(philly) +
-  geom_sf(aes(fill = LNMEDHVAL), color = NA) +
-  scale_fill_viridis_c(option = "plasma") +
-  labs(title = "Choropleth Map of LNMEDHVAL", fill = "Log Median Value") +
-  theme_minimal()
-
+  geom_sf(aes(fill = LNMEDHVAL), color = "transparent") +
+  scale_fill_gradientn(colors = c("#FAF9F6", "#c44536"), 
+                       name = "LNMEDHVAL", 
+                       na.value = "transparent") +  # Handle NAs
+  theme(legend.text = element_text(size = 9),
+        legend.title = element_text(size = 10),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        plot.subtitle = element_text(size = 9, face = "italic"),
+        plot.title = element_text(size = 12, face = "bold"),
+        panel.background = element_blank(),
+        panel.border = element_rect(colour = "grey", fill = NA, size = 0.8)) +
+  labs(title = "Log Transformed Median House Value")
 
 ```
 
-
-```{r fig.height=8, fig.width=10}
-
-library(patchwork)
+```{r more choropleth, fig.height=8, fig.width=11, message=FALSE, warning=FALSE}
 
 map_pctvacant <- ggplot(philly) +
-  geom_sf(aes(fill = PCTVACANT), color = NA) +
-  scale_fill_viridis_c(option = "plasma") +
-  labs(title = "PCTVACANT", fill = "% Vacant") +
-  theme_minimal()
+  geom_sf(aes(fill = PCTVACANT), color = "transparent") +
+  scale_fill_gradientn(colors = c("#FAF9F6", "#c44536"), 
+                       name = "PCTVACANT", 
+                       na.value = "transparent") +  # Handle NAs
+  theme(legend.text = element_text(size = 9),
+        legend.title = element_text(size = 10),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        plot.subtitle = element_text(size = 9, face = "italic"),
+        plot.title = element_text(size = 12, face = "bold"),
+        panel.background = element_blank(),
+        panel.border = element_rect(colour = "grey", fill = NA, size = 0.8)) +
+  labs(title = "% of Vacant Houses")
 
 map_pctsingles <- ggplot(philly) +
-  geom_sf(aes(fill = PCTSINGLES), color = NA) +
-  scale_fill_viridis_c(option = "magma") +
-  labs(title = "PCTSINGLES", fill = "% Singles") +
-  theme_minimal()
+  geom_sf(aes(fill = PCTSINGLES), color = "transparent") +
+  scale_fill_gradientn(colors = c("#FAF9F6", "#c44536"), 
+                       name = "PCTSINGLES", 
+                       na.value = "transparent") +  # Handle NAs
+  theme(legend.text = element_text(size = 9),
+        legend.title = element_text(size = 10),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        plot.subtitle = element_text(size = 9, face = "italic"),
+        plot.title = element_text(size = 12, face = "bold"),
+        panel.background = element_blank(),
+        panel.border = element_rect(colour = "grey", fill = NA, size = 0.8)) +
+  labs(title = "% of Single House Units")
 
 map_pcbachmore <- ggplot(philly) +
-  geom_sf(aes(fill = PCTBACHMOR), color = NA) +
-  scale_fill_viridis_c(option = "inferno") +
-  labs(title = "PCTBACHMORE", fill = "% Bachelor’s") +
-  theme_minimal()
+  geom_sf(aes(fill = PCTBACHMOR), color = "transparent") +
+  scale_fill_gradientn(colors = c("#FAF9F6", "#c44536"), 
+                       name = "PCTBACHMOR", 
+                       na.value = "transparent") +  # Handle NAs
+  theme(legend.text = element_text(size = 9),
+        legend.title = element_text(size = 10),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        plot.subtitle = element_text(size = 9, face = "italic"),
+        plot.title = element_text(size = 12, face = "bold"),
+        panel.background = element_blank(),
+        panel.border = element_rect(colour = "grey", fill = NA, size = 0.8)) +
+  labs(title = "% Bachelor's Degree or Higher")
+
 
 map_lnbelpov100 <- ggplot(philly) +
-  geom_sf(aes(fill = LNNBELPOV), color = NA) +
-  scale_fill_viridis_c(option = "cividis") +
-  labs(title = "LNNBELPOV100", fill = "Log Poverty") +
-  theme_minimal()
+  geom_sf(aes(fill = LNNBELPOV), color = "transparent") +
+  scale_fill_gradientn(colors = c("#FAF9F6", "#c44536"), 
+                       name = "LNNBELPOV", 
+                       na.value = "transparent") +  # Handle NAs
+  theme(legend.text = element_text(size = 9),
+        legend.title = element_text(size = 10),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        plot.subtitle = element_text(size = 9, face = "italic"),
+        plot.title = element_text(size = 12, face = "bold"),
+        panel.background = element_blank(),
+        panel.border = element_rect(colour = "grey", fill = NA, size = 0.8)) +
+  labs(title = "Logged Transformed Poverty")
 
 map_pctvacant + map_pctsingles + map_pcbachmore + map_lnbelpov100 + 
   plot_layout(ncol = 2)
-
 ```
+
+
+
 
 
 ```{r}
 
 # use the lm command to run the regression where LNMEDHVAL is the dependent variable and PCTVACANT, PCTSINGLES, PCTBACHMOR, and LNNBELPOV100 are predictors
 
-fit <- lm(LNMEDHVAL ~ PCTVACANT + PCTSINGLES + PCTBACHMOR + LNNBELPOV100, data=data_processed)
+fit <- lm(LNMEDHVAL ~ PCTVACANT + PCTSINGLES + PCTBACHMOR + LNNBELPOV100, data=reg_data)
 summary(fit)
 
 ```
