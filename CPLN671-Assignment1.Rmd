@@ -47,7 +47,7 @@ data <- read_csv(here("data", "RegressionData.csv"))
 ```
 
 
-# Introduction 
+# Introduction -- Ziyi
 
 a)	State the problem and the setting of the analysis (i.e., Philadelphia).
 b)  Present either a brief review of the literature (use Google Scholar) or simply speculate as to why the predictors we are using might be related with the response variable.
@@ -55,7 +55,7 @@ b)  Present either a brief review of the literature (use Google Scholar) or simp
 # Methods
 
 
-## Data Cleaning 
+## Data Cleaning - Emma
 
 Simply state that the original dataset had 1816 observations (i.e., block groups) and was cleaned in order to achieve a dataset with 1720 observations (that is, basically include the information about data cleaning that is on the very the first page of this assignment).
 
@@ -66,13 +66,13 @@ Note that the original Philadelphia block group dataset has 1816 observations. W
 - Block groups where the median house value is lower than $10,000
 - One North Philadelphia block group which had a very high median house value (over 800,000) and a very low median household income (less than 8,000)
 
-## Exploratory Data Analysis
+## Exploratory Data Analysis - Emma
 
 State that you will examine the summary statistics and distributions of variables.
 Also state that as part of your exploratory data analysis, you will examine the correlations between the predictors.  
 Explain what a correlation is, and provide the formula for the sample correlation coefficient r. Also mention the possible range of r values, and what correlation of 0 means.
 
-## Multiple Regression Analysis
+## Multiple Regression Analysis - Emily
 
 Describe the method of regression in several sentences. What is it used for, what does it do?
 
@@ -89,19 +89,19 @@ Talk about the coefficient of multiple determination R2, and the adjusted R2. Pr
 
 State the hypotheses you test. Specifically, talk about the F-ratio and the H0 and Ha associated with it, as well as the hypotheses you test about each of the individual βi’s (again, state H0 and Ha).
 
-## Additional Analyses
+## Additional Analyses - Emily
 
 Talk about stepwise regression – discuss what it does and its limitations
 
 Talk about k-fold cross-validation (mentioning that k = 5) – discuss what it is used for, describe how it is operationalized and mention that the RMSE is used to compare models (explain what the RMSE is and how it is calculated, presenting and describing any relevant formulas).
 
-## Software and Pacakges
+## Software and Pacakges - Emily
 
 State that you’re using R for your data analysis.
 
 # Results
 
-## Exploratory Results
+## Exploratory Results - Ziyi
 
 Present and briefly talk about the table with summary statistics which includes the dependent variable and the predictors (i.e., mean, standard deviation).
 
@@ -354,7 +354,7 @@ map_pctvacant + map_pctsingles + map_pcbachmore + map_lnbelpov100 +
   plot_layout(ncol = 2)
 ```
 
-## Regression Results
+## Regression Results - Emma
 
 Present the regression output from R. Be sure that your output presents the parameter estimates (and associated standard errors, t-statistics and p-values), as well as the R2, the adjusted R2, and the relevant F-ratio and associated p-value.
 
@@ -373,7 +373,7 @@ anova_table
 ```
 
 
-## Regression Assumption Check
+## Regression Assumption Check - Emma
 
 First state that in this section, you will be talking about testing model assumptions. State that you have already looked at the variable distributions earlier.
 
@@ -494,7 +494,7 @@ philly %>%
 
 ```
 
-## Additional Analyses
+## Additional Analyses - Ziyi
 
 
 Present the results of the stepwise regression and state whether all 4 predictors in the original model are kept in the final model.
@@ -525,7 +525,7 @@ cvlm_model_reduced = train(LNMEDHVAL ~ PCTVACANT + MEDHHINC, data = reg_data, me
 print(cvlm_model_reduced)
 ```
 
-# Discussion and Limitations
+# Discussion and Limitations - Emily
 
 a)	Recap what you did in the paper and your findings. Discuss what conclusions you can draw, which variables were significant and whether that was surprising or not.
 
