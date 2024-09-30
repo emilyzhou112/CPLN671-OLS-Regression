@@ -49,8 +49,13 @@ data <- read_csv(here("data", "RegressionData.csv"))
 
 # Introduction -- Ziyi
 
-a)	State the problem and the setting of the analysis (i.e., Philadelphia).
-b)  Present either a brief review of the literature (use Google Scholar) or simply speculate as to why the predictors we are using might be related with the response variable.
+Housing values in Philadelphia have seen a consistent increase in recent years, making it an important area of concern and research for urban planners, policymakers, and residents. This upward trend has raised issues around housing affordability, particularly for low- and middle-income households. Many neighborhoods have experienced gentrification, leading to the displacement of long-term residents and changing the socio-economic landscape of the city. Examining housing values is critical for understanding these shifts and addressing concerns related to affordability, neighborhood stability, and equitable development across Philadelphia.
+
+bachelor's degree,educational level plays crucial rule in an area's housing value, 
+vacant rate: vacant housing
+detached single family housing's ratio affects the area's housing typology, 
+
+Research also consistently demonstrates a strong correlation between poverty levels and housing values. Areas with higher poverty rates often experience reduced demand for housing, as well as diminished investment in local infrastructure and services, which in turn can lead to lower property values 
 
 # Methods
 
