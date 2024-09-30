@@ -56,13 +56,9 @@ Housing values in Philadelphia have seen a consistent increase in recent years, 
 
 To better understand the potential factors influencing housing values in Philadelphia, we identified several key variables, including educational attainment, vacancy rates, the proportion of detached single-family homes, and poverty levels. These factors are closely linked to housing market trends and provide insights into the socio-economic conditions that may affect property values across the city.
 
-The educational attainment of a population is closely linked to economic outcomes, including housing values. Studies suggest that areas with higher levels of education tend to have more robust local economies, higher incomes, and increased demand for housing, which pushes up home values @Scott2012.
+The educational attainment of a population is closely linked to economic outcomes, including housing values. Studies suggest that areas with higher levels of education tend to have more robust local economies, higher incomes, and increased demand for housing, which pushes up home values @Scott2012. High vacancy rates are typically associated with declining neighborhoods and lower median house values. Vacant properties can be signs of economic distress, contributing to neighborhood decline through reduced upkeep, higher crime rates, and a negative perception of the area @mallach2018empty.In Philadelphia, the issue of vacancy has been particularly problematic in certain neighborhoods, where a large number of abandoned properties has led to significant reductions in housing values.@kromer2002vacant
 
-High vacancy rates are typically associated with declining neighborhoods and lower median house values. Vacant properties can be signs of economic distress, contributing to neighborhood decline through reduced upkeep, higher crime rates, and a negative perception of the area @mallach2018empty
-
-detached single family housing's ratio affects the area's housing typology, 
-
-Research also consistently demonstrates a strong correlation between poverty levels and housing values. Areas with higher poverty rates often experience reduced demand for housing, as well as diminished investment in local infrastructure and services, which in turn can lead to lower property values @Galster2008. 
+The proportion of single-family homes in an area can also influence housing values, depending on the local market. Single-family homes are generally more desirable in many U.S. housing markets, as they offer more space, privacy, and perceived stability compared to multi-family units. Research also consistently demonstrates a strong correlation between poverty levels and housing values. Areas with higher poverty rates often experience reduced demand for housing, as well as diminished investment in local infrastructure and services, which in turn can lead to lower property values @Galster2008. 
 
 # Methods
 
