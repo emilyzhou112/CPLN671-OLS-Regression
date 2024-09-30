@@ -58,7 +58,7 @@ To better understand the potential factors influencing housing values in Philade
 
 The educational attainment of a population is closely linked to economic outcomes, including housing values. Studies suggest that areas with higher levels of education tend to have more robust local economies, higher incomes, and increased demand for housing, which pushes up home values @Scott2012. High vacancy rates are typically associated with declining neighborhoods and lower median house values. Vacant properties can be signs of economic distress, contributing to neighborhood decline through reduced upkeep, higher crime rates, and a negative perception of the area @mallach2018empty.In Philadelphia, the issue of vacancy has been particularly problematic in certain neighborhoods, where a large number of abandoned properties has led to significant reductions in housing values.@kromer2002vacant
 
-The proportion of single-family homes in an area can also influence housing values, depending on the local market. Single-family homes are generally more desirable in many U.S. housing markets, as they offer more space, privacy, and perceived stability compared to multi-family units. Research also consistently demonstrates a strong correlation between poverty levels and housing values. Areas with higher poverty rates often experience reduced demand for housing, as well as diminished investment in local infrastructure and services, which in turn can lead to lower property values @Galster2008. 
+The proportion of single-family homes in an area can also influence housing values, depending on the local market. Single-family homes are generally more desirable in many U.S. housing markets, as they offer more space, privacy, and perceived stability compared to multi-family units @glaeser2018economic. Research also consistently demonstrates a strong correlation between poverty levels and housing values. Areas with higher poverty rates often experience reduced demand for housing, as well as diminished investment in local infrastructure and services, which in turn can lead to lower property values @Galster2008. 
 
 # Methods
 
@@ -111,8 +111,6 @@ State that you’re using R for your data analysis.
 
 ## Exploratory Results - Ziyi
 
-Present and briefly talk about the table with summary statistics which includes the dependent variable and the predictors (i.e., mean, standard deviation).
-
 ```{r mean and sd, message=FALSE, warning=FALSE}
 
 # examine the mean and standard deviation of dependent and independent variables. 
@@ -153,6 +151,7 @@ dist_results %>%
 
 ```
 
+First we summarized the statistical data for the median house value and various predictors. The dependent variable, median house value, has an average of \$66,287.73, with a standard deviation of \$60,006.08, indicating significant variation in house values. For the predictors, the percentage of individuals with a bachelor’s degree or higher averages 16.08%, with a standard deviation of 17.77%, suggesting variability in educational attainment across the dataset. The number of households living in poverty averages 189.77, with a standard deviation of 164.32, reflecting a wide range of poverty levels. The percentage of vacant houses has a mean of 11.29%, with a standard deviation of 9.63%, while the percentage of single house units averages 9.23%, with a standard deviation of 13.25%. This data offers a comprehensive overview of the socio-economic and housing characteristics associated with median house values.
 
 Also state whether the variables are normal before and after the logarithmic transformation. 
 Present the histograms of the original variables alongside the histograms of the log-transformed variables, and clearly state whether you’re using the log-transformed or original variable in your regression. 
