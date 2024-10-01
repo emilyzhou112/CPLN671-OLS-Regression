@@ -259,15 +259,17 @@ ggcorrplot(cor_matrix,
         axis.title = element_text(size = 8))
 ```
 
+*Present the choropleth maps of the dependent variable and the predictors. Refer to the maps in the text, and talk about the following: Which maps look similar? Which maps look different? That is, which predictors do you expect to be strongly associated with the dependent variable based on the visualization? Also, given your examination of the maps, are there any predictors that you think will be strongly inter-correlated? That is, do you expect severe multicollinearity to be an issue here? Discuss this in a paragraph.*
+
+*Does the correlation matrix support your conclusions based on your visual comparison of predictor maps?* 
+
 The choropleth maps of the dependent variable and the predictor variables reveal several notable patterns. The map displaying the percentage of individuals with a bachelor's degree or higher shows similarities to the map depicting the percentage of single-family housing units, both highlighting higher concentrations in the northwest, with additional clusters in Center City and the far northeast. In contrast, the maps illustrating households living in poverty and vacant housing share similar patterns, showing higher concentrations in the north, west, and parts of the south of the city. This suggests an inverse relationship between poverty and vacant housing with educational attainment and single-family homeownership, which is consistent with the correlation matrix.
 
 Although some pairs of independent variables share general spatial patterns, they do not appear to be strongly correlated, and no severe multicollinearity is assumed. The correlation matrix validates this assumption, as no predictor pairs show very high correlations. 
 
 Moreover, the dependent variable, median housing value, appears to follow a pattern similar to educational attainment and single-family homeownership, while demonstrating an opposite trend to poverty and vacant housing. Based on these visualizations, we can expect educational attainment, specifically the percentage of individuals with a bachelor's degree or higher, to have the strongest association with the dependent variable, as these maps exhibit the most similar patterns.
 
-# Present the choropleth maps of the dependent variable and the predictors. Refer to the maps in the text, and talk about the following: Which maps look similar? Which maps look different? That is, which predictors do you expect to be strongly associated with the dependent variable based on the visualization? Also, given your examination of the maps, are there any predictors that you think will be strongly inter-correlated? That is, do you expect severe multicollinearity to be an issue here? Discuss this in a paragraph.
 
-# Does the correlation matrix support your conclusions based on your visual comparison of predictor maps? 
 
 ```{r choropleth, message=FALSE, warning=FALSE}
 
@@ -369,9 +371,11 @@ map_pctvacant + map_pctsingles + map_pcbachmore + map_lnbelpov100 +
 
 ## Regression Results - Emma
 
-Present the regression output from R. Be sure that your output presents the parameter estimates (and associated standard errors, t-statistics and p-values), as well as the R2, the adjusted R2, and the relevant F-ratio and associated p-value.
+*Present the regression output from R. Be sure that your output presents the parameter estimates (and associated standard errors, t-statistics and p-values), as well as the R2, the adjusted R2, and the relevant F-ratio and associated p-value.*
 
-Referencing the regression output in (i) above, interpret the results as in the example included above this report outline.
+*Referencing the regression output in (i) above, interpret the results as in the example included above this report outline.*
+
+
 
 ```{r linear regression, message=FALSE, warning=FALSE}
 
@@ -478,9 +482,9 @@ ggplot(reg_data, aes(x = Fitted, y = Standardized_Residuals)) +
 
 ```
 
-Referencing the maps of the dependent variable and the predictors that you presented earlier, state whether there seems to be spatial autocorrelation in your variables. That is, does it seem that the observations (i.e., block groups) are independent of each other? Briefly discuss.
+*Referencing the maps of the dependent variable and the predictors that you presented earlier, state whether there seems to be spatial autocorrelation in your variables. That is, does it seem that the observations (i.e., block groups) are independent of each other? Briefly discuss.*
 
-Now, present the choropleth map of the standardized regression residuals. Do there seem to be any noticeable spatial patterns in them? That is, do they seem to be spatially autocorrelated? You will examine the spatial autocorrelation of the variables and residuals and run spatial regressions in the next assignment. 
+*Now, present the choropleth map of the standardized regression residuals. Do there seem to be any noticeable spatial patterns in them? That is, do they seem to be spatially autocorrelated? You will examine the spatial autocorrelation of the variables and residuals and run spatial regressions in the next assignment.* 
 
 ```{r residual maps, message=FALSE, warning=FALSE}
 
@@ -509,9 +513,6 @@ philly %>%
 
 ## Additional Analyses - Ziyi
 
-
-Present the results of the stepwise regression and state whether all 4 predictors in the original model are kept in the final model.
-
 ```{r stepwise regression, message=FALSE, warning=FALSE}
 
 stepwise_model <-  stepAIC(fit, direction = "both")
@@ -519,7 +520,10 @@ stepwise_model$anova
 
 ```
 
-Present the cross-validation results – that is, compare the RMSE of the original model that includes all 4 predictors with the RMSE of the model that only includes PCTVACANT and MEDHHINC as predictors.
+*Present the results of the stepwise regression and state whether all 4 predictors in the original model are kept in the final model.*
+The stepwise regression model confirms the importance of all variables. Removing any variable increases the AIC, indicating a worse model fit. The lowest AIC occurs when all four variables are included, so the final model retains all the predictors from the initial model, confirming their relevance.
+
+
 
 ```{r cross validation, message=FALSE, warning = FALSE}
 
@@ -537,6 +541,12 @@ cvlm_model_reduced = train(LNMEDHVAL ~ PCTVACANT + MEDHHINC, data = reg_data, me
 
 print(cvlm_model_reduced)
 ```
+
+*Present the cross-validation results – that is, compare the RMSE of the original model that includes all 4 predictors with the RMSE of the model that only includes PCTVACANT and MEDHHINC as predictors.*
+
+The original model, which includes all four predictors, has a lower RMSE (0.3676) compared to the reduced model with only two predictors (0.4424). This indicates that the original model provides better predictive accuracy. The increase in RMSE when removing the additional predictors (PCTSINGLES and LNNBELPOV100) suggests that excluding these variables results in a less accurate model. Overall, the original model outperforms the reduced model, demonstrating that all four predictors contribute to improved model accuracy.
+
+
 
 # Discussion and Limitations - Emily
 
