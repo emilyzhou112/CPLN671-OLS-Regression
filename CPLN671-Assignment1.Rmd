@@ -233,8 +233,6 @@ This transformation has helped normalize some of the distributions, particularly
 Moving forward, we will use the log-transformed results for our analysis. The remaining regression assumptions will be examined in detail in a separate section titled Regression Assumption Checks.
 
 
-
-
 ```{r corr plot, message=FALSE, warning=FALSE}
 
 custom_labels <- c(
@@ -261,13 +259,15 @@ ggcorrplot(cor_matrix,
         axis.title = element_text(size = 8))
 ```
 
-Based on the correlation matrix, there does not appear to be strong evidence of multicollinearity among the predictor variables.
+The choropleth maps of the dependent variable and the predictor variables reveal several notable patterns. The map displaying the percentage of individuals with a bachelor's degree or higher shows similarities to the map depicting the percentage of single-family housing units, both highlighting higher concentrations in the northwest, with additional clusters in Center City and the far northeast. In contrast, the maps illustrating households living in poverty and vacant housing share similar patterns, showing higher concentrations in the north, west, and parts of the south of the city. This suggests an inverse relationship between poverty and vacant housing with educational attainment and single-family homeownership, which is consistent with the correlation matrix.
 
-Does the correlation matrix support your conclusions based on your visual comparison of predictor maps? 
+Although some pairs of independent variables share general spatial patterns, they do not appear to be strongly correlated, and no severe multicollinearity is assumed. The correlation matrix validates this assumption, as no predictor pairs show very high correlations. 
 
+Moreover, the dependent variable, median housing value, appears to follow a pattern similar to educational attainment and single-family homeownership, while demonstrating an opposite trend to poverty and vacant housing. Based on these visualizations, we can expect educational attainment, specifically the percentage of individuals with a bachelor's degree or higher, to have the strongest association with the dependent variable, as these maps exhibit the most similar patterns.
 
+# Present the choropleth maps of the dependent variable and the predictors. Refer to the maps in the text, and talk about the following: Which maps look similar? Which maps look different? That is, which predictors do you expect to be strongly associated with the dependent variable based on the visualization? Also, given your examination of the maps, are there any predictors that you think will be strongly inter-correlated? That is, do you expect severe multicollinearity to be an issue here? Discuss this in a paragraph.
 
-Present the choropleth maps of the dependent variable and the predictors. Refer to the maps in the text, and talk about the following: Which maps look similar? Which maps look different? That is, which predictors do you expect to be strongly associated with the dependent variable based on the visualization? Also, given your examination of the maps, are there any predictors that you think will be strongly inter-correlated? That is, do you expect severe multicollinearity to be an issue here? Discuss this in a paragraph. 
+# Does the correlation matrix support your conclusions based on your visual comparison of predictor maps? 
 
 ```{r choropleth, message=FALSE, warning=FALSE}
 
