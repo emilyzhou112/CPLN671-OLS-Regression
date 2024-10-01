@@ -153,10 +153,6 @@ dist_results %>%
 
 We began by summarizing the statistical data for median house values and various socio-economic predictors. The median house value has an average of \$66,287.73, with a standard deviation of \$60,006.08. This is significantly lower than both the county and state averages and shows considerable variation in house values. For educational attainment, 16.08% of individuals hold a bachelor’s degree or higher, much lower than the state average of 35.3%. The standard deviation of 17.77% suggests notable variability in this measure. The average number of households living in poverty is 189.77, with a wide range reflected by a standard deviation of 164.32. Vacant houses make up an average of 11.29%, slightly higher than the state average of 9.4%, with a standard deviation of 9.63%. Finally, single house units account for an average of 9.23%, with a standard deviation of 13.25%. 
 
-Also state whether the variables are normal before and after the logarithmic transformation. 
-Present the histograms of the original variables alongside the histograms of the log-transformed variables, and clearly state whether you’re using the log-transformed or original variable in your regression. 
-State that the other regression assumptions will be examined in a separate section below (Regression Assumption Checks).
-
 
 ```{r histograms, fig.height=7, fig.width=9, message=FALSE, warning=FALSE}
 
@@ -188,7 +184,7 @@ data %>%
 
 ```
 
-
+According to the histograms above, the original distributions were not normal. To address this, we applied a logarithmic transformation to the variables. 
 
 ```{r log variables, message=FALSE, warning=FALSE}
 
@@ -232,8 +228,12 @@ reg_data %>%
 
 ```
 
+This transformation has helped normalize some of the distributions, particularly for variables like median house value, number of households in poverty, and percentage of vacant houses. These variables now display more symmetric, bell-shaped distributions. However, for variables like the percentage of individuals with a bachelor’s degree and percentage of single house units, the transformation was less effective, and they still deviate from a normal distribution. 
 
-Present the correlation matrix of the predictors which you obtained from R. Talk about whether the correlation matrix shows that there is severe multicollinearity. Does the correlation matrix support your conclusions based on your visual comparison of predictor maps?
+Moving forward, we will use the log-transformed results for our analysis. The remaining regression assumptions will be examined in detail in a separate section titled Regression Assumption Checks.
+
+
+
 
 ```{r corr plot, message=FALSE, warning=FALSE}
 
@@ -260,6 +260,12 @@ ggcorrplot(cor_matrix,
         axis.text.y = element_text(size = 7), 
         axis.title = element_text(size = 8))
 ```
+
+Based on the correlation matrix, there does not appear to be strong evidence of multicollinearity among the predictor variables.
+
+Does the correlation matrix support your conclusions based on your visual comparison of predictor maps? 
+
+
 
 Present the choropleth maps of the dependent variable and the predictors. Refer to the maps in the text, and talk about the following: Which maps look similar? Which maps look different? That is, which predictors do you expect to be strongly associated with the dependent variable based on the visualization? Also, given your examination of the maps, are there any predictors that you think will be strongly inter-correlated? That is, do you expect severe multicollinearity to be an issue here? Discuss this in a paragraph. 
 
