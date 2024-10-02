@@ -9,8 +9,8 @@ output:
     toc_float: yes
     code_folding: hide
     code_download: yes
-    
 bibliography: references.bib
+csl: apa.csl 
 
 editor_options:
   markdown:
@@ -45,69 +45,143 @@ library(caret)
 ```{r read data, message=FALSE, warning=FALSE, include=FALSE}
 
 # read in data
-data <- read_csv(here("RegressionData.csv"))
+data <- read_csv(here("data", "RegressionData.csv"))
 
 ```
 
 
-# Introduction -- Ziyi
+# Introduction
 
-Housing values in Philadelphia have seen a consistent increase in recent years, making it an important area of concern and research for urban planners, policymakers, and residents. This upward trend has raised issues around housing affordability, particularly for low- and middle-income households. Many neighborhoods have experienced gentrification, leading to the displacement of long-term residents and changing the socio-economic landscape of the city. Examining housing values is critical for understanding these shifts and addressing concerns related to affordability, neighborhood stability, and equitable development across Philadelphia.
+Housing values in Philadelphia have seen a consistent increase in recent years, making it an important area of concern and research for urban planners and policymakers. This upward trend has raised issues around housing affordability, particularly for low and middle-income households. Many neighborhoods have experienced gentrification, leading to the displacement of long-term residents and changing the socio-economic landscape of the city. Examining housing values is critical for understanding these shifts and addressing concerns related to affordability, neighborhood stability, and equitable development across Philadelphia.
 
 To better understand the potential factors influencing housing values in Philadelphia, we identified several key variables, including educational attainment, vacancy rates, the proportion of detached single-family homes, and poverty levels. These factors are closely linked to housing market trends and provide insights into the socio-economic conditions that may affect property values across the city.
 
-The educational attainment of a population is closely linked to economic outcomes, including housing values. Studies suggest that areas with higher levels of education tend to have more robust local economies, higher incomes, and increased demand for housing, which pushes up home values @Scott2012. High vacancy rates are typically associated with declining neighborhoods and lower median house values. Vacant properties can be signs of economic distress, contributing to neighborhood decline through reduced upkeep, higher crime rates, and a negative perception of the area @mallach2018empty.In Philadelphia, the issue of vacancy has been particularly problematic in certain neighborhoods, where a large number of abandoned properties has led to significant reductions in housing values.@kromer2002vacant
+Educational attainment is closely tied to economic outcomes and this includes property values. Studies suggest that areas with higher levels of education tend to have more robust local economies, higher incomes, and increased demand for housing, which pushes up home values @Scott2012. High vacancy rates are typically associated with declining neighborhoods and lower median house values. Vacant properties can be signs of economic distress, contributing to neighborhood decline through reduced upkeep, higher crime rates, and a negative perception of the area @mallach2018empty. In Philadelphia, the issue of vacancy has been particularly problematic in certain neighborhoods, where a large number of abandoned properties has led to significant reductions in housing values @kromer2002vacant.
 
 The proportion of single-family homes in an area can also influence housing values, depending on the local market. Single-family homes are generally more desirable in many U.S. housing markets, as they offer more space, privacy, and perceived stability compared to multi-family units @glaeser2018economic. Research also consistently demonstrates a strong correlation between poverty levels and housing values. Areas with higher poverty rates often experience reduced demand for housing, as well as diminished investment in local infrastructure and services, which in turn can lead to lower property values @Galster2008. 
 
 # Methods
 
+## Data Cleaning
 
-## Data Cleaning - Emma
-*Simply state that the original dataset had 1816 observations (i.e., block groups) and was cleaned in order to achieve a dataset with 1720 observations (that is, basically include the information about data cleaning that is on the very the first page of this assignment).
+The original dataset used in this study consisted of 1816 census block groups in Philadelphia according to the 2000 Census, but to ensure the dataset was suitable for regression analysis, several data cleaning procedures were performed. First, every block group in the dataset with a population of less than 40 was removed. These block groups represent sparsely populated or unusually housed areas that may introduce noise into the analysis. Secondly, block groups without any housing units were also excluded due to their lack of significance in a study centered on housing attributes. Thirdly, block groups with a median housing value of less than \$10,000 were not included. These block groups do not accurately reflect the reality of the typical housing market, and the unusually low home values in these block groups may bias the results of the study. Finally, a unique combination of values - median property values over \$800,000 and typical household incomes less than \$8,000 - led to the exclusion of one block group in North Philadelphia. As a clear outlier, it was excluded to avoid biasing the results. The final dataset includes 1,720 observations, each corresponding to a different Philadelphia block group, and has the following attributes:
 
-*Note that the original Philadelphia block group dataset has 1816 observations. We clean the data by removing the following block groups: 
+- **POLY_ID**: Census block group ID
+- **MEDHVAL**: Median value of all owner occupied housing units
+- **PCTBACHMOR**: Proportion of residents in Block Group with at least a Bachelor’s degree
+- **PCTVACANT**: Proportion of housing units that are vacant
+- **PCTSINGLES**: Percent of housing units that are detached single family houses 
+- **NBELPOV100**: Number of households with incomes below 100% poverty level (i.e., number of households living in poverty)
+- **MEDHHINC**: Median household income
 
-- Block groups where population < 40
-- Block groups where there are no housing units
-- Block groups where the median house value is lower than $10,000
-- One North Philadelphia block group which had a very high median house value (over 800,000) and a very low median household income (less than 8,000)
 
-The original dataset used in this study consisted of 1,816 census block groups from the Philadelphia 2000 Census. In order to ensure that the dataset was suitable for regression analysis and to remove any extreme outliers or erroneous data, several data cleaning procedures were performed. First, every block group in the dataset with a population of less than 40 was removed. These block groups represent sparsely populated or unusually housed areas that may introduce noise into the analysis. In addition, block groups without any dwelling units were also excluded due to their lack of significance in a study centred on housing attributes. 
+## Exploratory Data Analysis
 
-Additionally, block groups with a median housing value of less than $10,000 were not included. These block groups do not accurately reflect the reality of the typical housing market, and the unusually low home values in these block groups may bias the results of the study. Finally, a unique combination of values - median property values over $800,000 and typical household incomes less than $8,000 - led to the exclusion of one block group in North Philadelphia. Since this was a clear outlier, this block group was excluded to avoid biasing the results. After using these cleaning procedures, the final dataset includes 1,720 observations, each corresponding to a different Philadelphia block group. The cleaned dataset can now be used in more accurate and reliable regression analyses to test for associations between neighbourhoods.
+We begin by examining the summary statistics and distributions of the dependent and independent variables. This will provide a better understanding of the data and help identify any potential outliers or unusual patterns that may need to be addressed before proceeding with regression analysis. In our case, the median home value (MEDHVAL) is the dependent variable. The independent variables are the proportion of the population with a bachelor's degree or higher (PCBACHMORE), the number of households in poverty (NBELPOV100), the proportion of vacant homes (PCTVACANT), and the proportion of single family homes (PCTSINGLES). We computed the mean and standard deviation for each variable to understand the central tendency and variability of the data. If results show that the variable is non-normally distributed, we apply a log transformation to normalize the data.
 
-## Exploratory Data Analysis - Emma
-*State that you will examine the summary statistics and distributions of variables.
-Also state that as part of your exploratory data analysis, you will examine the correlations between the predictors.  
-*Explain what a correlation is, and provide the formula for the sample correlation coefficient r. Also mention the possible range of r values, and what correlation of 0 means.
+This is followed by investigating the correlations between the predictor variables to avoid multicollinearity. Correlation is a statistical measure that describes the strength and direction of a relationship between variables. The correlation coefficient \(r\) quantifies the degree to which two variables are linearly related. The formula for the sample correlation coefficient \(r\) is as follows: 
 
-In the first stage of exploratory data analysis, summary statistics and distribution of important variables will be examined. The median home value (MEDHVAL) is the dependent variable. The independent variables are the proportion of the population with a bachelor's degree or higher (PCBACHMORE), the number of households in poverty (NBELPOV100), the proportion of vacant homes (PCTVACANT), and the proportion of single family homes (PCTSINGLES). In addition, means and standard deviations were calculated for each variable. These summary statistics provide a better picture of the variability and central tendency of the data and provide a basis for more in-depth investigation. It may be necessary to address any strange patterns or outliers found by looking at these data before conducting regression analyses.
+$$
+r = \frac{\sum_{i=1}^{n} (x_i - \bar{x})(y_i - \bar{y})}{\sqrt{\sum_{i=1}^{n} (x_i - \bar{x})^2 \sum_{i=1}^{n} (y_i - \bar{y})^2}}
+$$
+In a more concise way, this above formula is also equivalent to the following: 
 
-This study will investigate the correlations between the predictor variables in addition to descriptive statistics. Regression analysis can be complicated by multicollinearity, which can be identified by correlation, a measure of the linear relationship between two variables. The following formula is used to get the sample correlation coefficient, or r:
+$$
+r = \frac{1}{n-1} \sum_{i=1}^{n} \left( \frac{x_i - \bar{x}}{S_x} \right) \left( \frac{y_i - \bar{y}}{S_y} \right)
+$$
+where \(x_i\) and \(y_i\) are individual data points, \(\bar{x}\) and \(\bar{y}\) are the means of the variables \(x\) and \(y\), \(S_x\) and \(S_y\) are the standard deviations of the variables \(x\) and \(y\) respectively. 
 
-r=
+For each observation \(i\), the formula calculates the difference between the data point \(x_i\), \(y_i\) and the mean of the variables and then divides them by their standard deviation. Then, these standardized values are multiplied together to assess the extent to which the two variables deviate from their respective means in the same direction. The result of this multiplication is summed across all observations, which aggregates the individual contributions to the correlation. Finally, dividing this sum by \(n-1\) where \(n\) is the number of observations yields the sample correlation coefficient \(r\).
 
-In this formula, 𝑋𝑖 and 𝑌𝑖 represent individual data points, and 𝑋ˉ and 𝑌ˉ are the means of the variables 𝑋 and 𝑌, respectively. The correlation coefficient r can range from -1 to +1. A value of +1 indicates a perfect positive linear relationship, where increases in one variable correspond with increases in the other, while a value of -1 indicates a perfect negative linear relationship. A value of 0 suggests no linear relationship between the variables, meaning changes in one do not predict changes in the other.
+The correlation coefficient **\(r\)** can range from -1 to +1. A value of +1 indicates a perfect positive linear relationship, where increases in one variable correspond with increases in the other, while a value of -1 indicates a perfect negative linear relationship. A value of 0 suggests no linear relationship between the variables, meaning changes in one do not predict changes in the other. Understanding the correlations between the predictors is critical to identify whether any variables are highly correlated, which would suggest multicollinearity. Multicollinearity can distort the regression results by inflating the standard errors of the coefficients, which lead to less reliable interpretations. 
 
-Understanding the correlations between the predictors is critical to identify whether any variables are highly correlated, which would suggest multicollinearity. Multicollinearity can distort the regression results by inflating the standard errors of the coefficients, leading to less reliable interpretations. Therefore, evaluating the correlations before proceeding to the regression analysis ensures the robustness of the model.
+## Multiple Regression Analysis
 
-## Multiple Regression Analysis - Emily
+After exploring the data, we conduct a multiple regression analysis to examine the relationship between the dependent variable (median house value) and the independent variables (educational attainment, poverty levels, vacancy rates, and single-family housing). Regression analysis is a statistical method used to examine the relationship between a dependent variable and one or more independent variables. It allows researchers to understand how the dependent variable changes as the independent variables vary and make inferences about the relationships among the variables. The model estimates coefficients for each independent variable, which quantify the expected change in the dependent variable for a one-unit increase in the independent variable, holding all other variables constant. For our problem, the equation for the multiple regression model is as follows:
 
-Describe the method of regression in several sentences. What is it used for, what does it do?
 
-State the equation for y for this problem. The equation should be in the form: by=β_0+β_1 x_1+⋯+β_k x_k+ε. 
-However, in your report, instead of y and x1…xk, fill in the actual variable names (as in the regression example given above). Be sure to mention what βi’s and ε are as well. If the variables are log transformed, be sure to indicate that in the formulas.
+$$
+\text{LNMEDHVAL} = \beta_0 + \beta_1 \text{PCTVACANT} + \beta_2 \text{PCTSINGLES} + \beta_3 \text{PCTBACHMOR} + \beta_4 \text{LN(LNNBELPOV100)} + \epsilon
+$$
 
-State and explain regression assumptions (e.g., linearity; independence of observations; normality of residuals; homoscedasticity; no multicollinearity).
+where \(\text{LNMEDHVAL}\) is the log-transformed median house value, \(\text{PCTVACANT}\) is the proportion of vacant housing units, \(\text{PCTSINGLES}\) is the proportion of single-family detached homes, \(\text{PCTBACHMOR}\) is the percentage of residents with a bachelor's degree or higher, \(\text{LN(LNNBELPOV100)}\) is the log-transformed number of households living below the poverty line. 
 
-Mention the parameters that need to be estimated in multiple regression (σ2, β0 ,…, βk). State what σ2 is (you should have already talked about βi in (ii) above). 
 
-Talk about the way of estimating the parameters. (Hint: present the equation on the slide ‘β Coefficient Estimation – Least Squares’ for multiple regression and briefly discuss what the equation does).
+\(\beta_0\) is the intercept, \(\beta_1, \beta_2, \beta_3, \beta_4\) are the coefficients for each independent variable, and \(\epsilon\) is the residual error term. The coefficients \(\beta_1, \beta_2, \beta_3, \beta_4\) represent the expected change in \(\text{LNMEDHVAL}\) for a one-unit increase in the corresponding independent variable, holding all other variables constant. The error term \(\epsilon\) accounts for the variability in \(\text{LNMEDHVAL}\) that is not explained by the independent variables.
 
-Talk about the coefficient of multiple determination R2, and the adjusted R2. Present and explain the relevant formulas and all the terms that are used in the formulas.
+There are several assumptions associated with regression analysis that needs to be check before we further proceed. First, **linearity** asserts that there should be a linear relationship between the dependent variables and independent variable. To verify this assumption, we made scatterplots to visualize the relationship between the relationship between **\(y\)** and each of the predictor. 
 
-State the hypotheses you test. Specifically, talk about the F-ratio and the H0 and Ha associated with it, as well as the hypotheses you test about each of the individual βi’s (again, state H0 and Ha).
+Second the assumption of **independence of observations** requires that the observations within the dataset be independent of one another, without any spatial, temporal, or other dependencies. In spatial contexts, we made choropleth maps to assess the presence of spatial autocorrelation in the residuals or dependent variable. 
+
+Third, the **normality of residuals** assumption states that the residuals should follow a normal distribution. While this assumption is less critical in large samples due to the Central Limit Theorem, it remains desirable for inference purposes. To evaluate this assumption, we made a histogram of the residuals - a bell-shaped curve would suggest that the residuals are normally distributed.
+
+Another important assumption is **homoscedasticity**, which states that the variance of the residuals should remain constant across all levels of the independent variables. We assessed homoscedasticity by examining scatterplot of standardized residuals against predicted values.  Ideally, these residuals should be evenly distributed around zero; any patterns may indicate the presence of heteroscedasticity.
+
+The assumption of **no multicollinearity** asserts that the predictor variables should not be highly correlated with each other, as this can inflate the variance of the coefficient estimates and make them unstable. To check for multicollinearity, we created a correlation matrixfor the predictors to look for any correlations greater than 0.8 (or less than -0.8). 
+
+Finally, it is important to consider the **ratio of observations to predictors** in the model. A general guideline suggests having at least 10 to 15 observations for each predictor to ensure robust estimates. Since we have over 1700 observations in our dataset, this assumption is met. 
+
+After verifying these assumptions, we proceed with the regression analysis. There are several parameters that we need to estimate here: \( \beta_0 \), which is the intercept,  \( \beta_1, \dots, \beta_k \), which are coefficients of the independent variables, as well as  \( \sigma^2 \), the variance of the error terms, which represents the variability in the dependent variable \(Y\) that is not explained by the predictors \(X_1, \dots, X_k\).
+
+The least squares method estimates the coefficients by *minimizing the sum of squared residuals*. Given \(n\) observations on \(y\), and \(k\) predictors  \(X_1, \dots, X_k\), the estimates \( \beta_1, \dots, \beta_k \) are chosen simultaneously to minimize the expression for the Error Sum of Squares (SSE), given by:
+
+$$
+\text{SSE} = \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 = \sum_{i=1}^{n} (y_i - \hat{\beta}_0 - \hat{\beta}_1 x_{i1} - \dots - \hat{\beta}_k x_{ik})^2
+$$
+
+where \( y_i \) represents the actual values, \( \hat{\beta}_0 \) is the estimated intercept, \( \beta_1 \) is the coefficient for the predictor \(x_{1i}\), and \( x_{1i} \) is the predictor value for the \(i\)-th observation.
+
+With the Error Sum of Squares (SSE), the equation of the estimated variance of the error term \( \sigma^2 \) is given by:
+
+$$
+\sigma^2 = \frac{\text{SSE}}{n - (k+1)}
+$$
+
+where \( n \) is the number of observations and \( k \) is the number of predictors in the model.
+
+We evaluated the model's goodness of fit using the coefficient of determination \(R^2\), which quantifies the proportion of variance in the dependent variable explained by the independent variables. The adjusted \(R^2\), which adjusts the \(R^2\) value based on the number of predictors in the model to provide a more accurate measure of model fit for multiple regression. In simple regression: 
+
+$$
+SST = \sum_{i=1}^{n} (y_i - \bar{y})^2
+$$
+where \( y_i \) is the observed value, \( \bar{y} \) is the mean of the observed values, and \( n \) is the number of observations. Then,   \(R^2\) can be simply obtained by: 
+
+$$
+R^2 = 1 - \frac{SSE}{SST}
+$$
+\(R^2\) is then typically adjusted as follows based on \( n \), the number of observations and \( k \), the number of predictors in the model. 
+
+$$
+R^2_{\text{adj}} = 1 - \frac{(1 - R^2)(n - 1)}{n - k - 1}
+$$
+
+In this analysis, we test several hypotheses to evaluate the significance of the model and its predictors. The overall significance of the regression model is assessed using the F-ratio. It compares the variance explained by the regression model to the variance that is not explained by the model, assessing whether the independent variables as a whole have a statistically significant effect on the dependent variable. A higher F-ratio indicates that the regression model explains a significant amount of variance in the dependent variable compared to the residual variance.
+
+The null hypothesis (\( H_0 \)) and alternative hypothesis (\( H_a \)) for the F-ratio are stated as follows:
+
+- **Null Hypothesis (\( H_0 \))**: The regression model does not explain a significant portion of the variance in the dependent variable (median house value). In our case, this means that the coefficients for all the predictors are equal to zero and none of them explain any variance in housing price. This can be formally stated as:
+  $$
+  H_0: \beta_1 = \beta_2 = \beta_3 = \beta_4 = 0
+  $$
+
+- **Alternative Hypothesis (\( H_a \))**: At least one of the predictor variables has a significant effect on the dependent variable. In our case, this means that at least one of the coefficients for the predictors is not equal to zero, indicating that the predictor has a significant impact on housing prices. This can be stated as:
+  $$
+  H_a: \text{At least one } \beta_i \neq 0
+  $$
+
+For each individual predictor \( \beta_i \), we also test the following hypotheses:
+
+- **Null Hypothesis (\( H_{0i} \))**: The coefficient for the predictor \( i \) is equal to zero, indicating that it does not have a significant effect on the dependent variable (median house value). This can be formally stated as:
+  $$
+  H_{0i}: \beta_i = 0
+  $$
+
+- **Alternative Hypothesis (\( H_{ai} \))**: The coefficient for the predictor \( i \) is not equal to zero, indicating that it has a significant effect on the dependent variable. This can be stated as:
+  $$
+  H_{ai}: \beta_i \neq 0
+  $$
+
+Each predictor's significance is typically assessed using a t-test, which tests whether the estimated coefficient differs significantly from zero.
 
 ## Additional Analyses - Emily
 
@@ -115,9 +189,20 @@ Talk about stepwise regression – discuss what it does and its limitations
 
 Talk about k-fold cross-validation (mentioning that k = 5) – discuss what it is used for, describe how it is operationalized and mention that the RMSE is used to compare models (explain what the RMSE is and how it is calculated, presenting and describing any relevant formulas).
 
-## Software and Pacakges - Emily
+## Software and Pacakges 
 
-State that you’re using R for your data analysis.
+For our data analysis, we are utilizing the R programming language. The following libraries have been employed to facilitate our analysis: 
+
+- `tidyverse`: A collection of R packages designed for data science that includes tools for data manipulation, visualization, and analysis.
+- `here`: A package that simplifies file path management, making it easier to work with project directories.
+- `kableExtra`: A package for creating and customizing tables in R Markdown documents.
+- `ggplot2`: A widely-used package for creating static graphics and visualizations based on the grammar of graphics.
+- `ggcorrplot`: A package specifically designed for visualizing correlation matrices using ggplot2.
+- `sf`: A package that provides support for spatial data in R, enabling the handling and analysis of geometric objects.
+- `patchwork`: A package that allows for the combination of multiple ggplot2 plots into a single cohesive layout.
+- `MASS`: A package that provides functions and datasets for various statistical methods, including linear and generalized linear models.
+- `caret`: A package that streamlines the process of creating predictive models, including functions for data splitting, pre-processing, feature selection, and model tuning.
+
 
 # Results
 
@@ -277,14 +362,14 @@ Although some pairs of independent variables share general spatial patterns, the
 
 Moreover, the dependent variable, median housing value, appears to follow a pattern similar to educational attainment and single-family homeownership, while demonstrating an opposite trend to poverty and vacant housing. Based on these visualizations, we can expect educational attainment, specifically the percentage of individuals with a bachelor's degree or higher, to have the strongest association with the dependent variable, as these maps exhibit the most similar patterns.
 
-# Present the choropleth maps of the dependent variable and the predictors. Refer to the maps in the text, and talk about the following: Which maps look similar? Which maps look different? That is, which predictors do you expect to be strongly associated with the dependent variable based on the visualization? Also, given your examination of the maps, are there any predictors that you think will be strongly inter-correlated? That is, do you expect severe multicollinearity to be an issue here? Discuss this in a paragraph.
+Present the choropleth maps of the dependent variable and the predictors. Refer to the maps in the text, and talk about the following: Which maps look similar? Which maps look different? That is, which predictors do you expect to be strongly associated with the dependent variable based on the visualization? Also, given your examination of the maps, are there any predictors that you think will be strongly inter-correlated? That is, do you expect severe multicollinearity to be an issue here? Discuss this in a paragraph.
 
-# Does the correlation matrix support your conclusions based on your visual comparison of predictor maps? 
+Does the correlation matrix support your conclusions based on your visual comparison of predictor maps? 
 
 ```{r choropleth, message=FALSE, warning=FALSE}
 
 # choropleth maps of predictor and dependent variables
-philly <- st_read(here("shapefile", "RegressionData.shp"))
+philly <- st_read(here("data","shapefile", "RegressionData.shp"))
 ggplot(philly) +
   geom_sf(aes(fill = LNMEDHVAL), color = "transparent") +
   scale_fill_gradientn(colors = c("#FAF9F6", "#c44536"), 
@@ -409,6 +494,8 @@ The residual sum of squares, which represents the unexplained variation in the m
 fit <- lm(LNMEDHVAL ~ PCTVACANT + PCTSINGLES + PCTBACHMOR + LNNBELPOV100, data=reg_data)
 summary(fit)
 ```
+
+
 ```{r anova table, message=FALSE, warning=FALSE}
 
 anova_table <- anova(fit)
@@ -643,6 +730,7 @@ In addition, talk about the limitations of using the NBELPOV100 variable as a pr
 d)	Would it make sense to run Ridge or LASSO regression here? Explain briefly (~4-5 sentences) what these methods are, when they’re used, and why they would or would not be appropriate here.
 
 
+# References
 
 
 
