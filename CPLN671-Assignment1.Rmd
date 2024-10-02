@@ -17,6 +17,11 @@ editor_options:
     wrap: sentence
 ---
 
+Version 2.0 \| First Created Sep 26, 2024 \| Updated Oct 4, 2024
+
+Keywords: Ordinary Least Square Regression, K-fold Cross Validation, Sum of Square Errors, Root Mean Squared Error, Stepwise AIC, 
+
+
 ```{r setup, include=FALSE}
 
 knitr::opts_chunk$set(echo = TRUE)
@@ -109,7 +114,9 @@ where \(\text{LNMEDHVAL}\) is the log-transformed median house value, \(\text{PC
 
 \(\beta_0\) is the intercept, \(\beta_1, \beta_2, \beta_3, \beta_4\) are the coefficients for each independent variable, and \(\epsilon\) is the residual error term. The coefficients \(\beta_1, \beta_2, \beta_3, \beta_4\) represent the expected change in \(\text{LNMEDHVAL}\) for a one-unit increase in the corresponding independent variable, holding all other variables constant. The error term \(\epsilon\) accounts for the variability in \(\text{LNMEDHVAL}\) that is not explained by the independent variables.
 
-There are several assumptions associated with regression analysis that needs to be check before we further proceed. First, **linearity** asserts that there should be a linear relationship between the dependent variables and independent variable. To verify this assumption, we made scatterplots to visualize the relationship between the relationship between **\(y\)** and each of the predictor. 
+### Regression Assumptions
+
+There are several assumptions associated with regression analysis that needs to be checked before we further proceed. First, **linearity** asserts that there should be a linear relationship between the dependent variables and independent variable. To verify this assumption, we made scatterplots to visualize the relationship between the relationship between **\(y\)** and each of the predictor. 
 
 Second the assumption of **independence of observations** requires that the observations within the dataset be independent of one another, without any spatial, temporal, or other dependencies. In spatial contexts, we made choropleth maps to assess the presence of spatial autocorrelation in the residuals or dependent variable. 
 
@@ -120,6 +127,8 @@ Another important assumption is **homoscedasticity**, which states that the vari
 The assumption of **no multicollinearity** asserts that the predictor variables should not be highly correlated with each other, as this can inflate the variance of the coefficient estimates and make them unstable. To check for multicollinearity, we created a correlation matrixfor the predictors to look for any correlations greater than 0.8 (or less than -0.8). 
 
 Finally, it is important to consider the **ratio of observations to predictors** in the model. A general guideline suggests having at least 10 to 15 observations for each predictor to ensure robust estimates. Since we have over 1700 observations in our dataset, this assumption is met. 
+
+### Parameter Estimations
 
 After verifying these assumptions, we proceed with the regression analysis. There are several parameters that we need to estimate here: \( \beta_0 \), which is the intercept,  \( \beta_1, \dots, \beta_k \), which are coefficients of the independent variables, as well as  \( \sigma^2 \), the variance of the error terms, which represents the variability in the dependent variable \(Y\) that is not explained by the predictors \(X_1, \dots, X_k\).
 
@@ -155,6 +164,8 @@ $$
 R^2_{\text{adj}} = 1 - \frac{(1 - R^2)(n - 1)}{n - k - 1}
 $$
 
+### Hypothesis Testing
+
 In this analysis, we test several hypotheses to evaluate the significance of the model and its predictors. The overall significance of the regression model is assessed using the F-ratio. It compares the variance explained by the regression model to the variance that is not explained by the model, assessing whether the independent variables as a whole have a statistically significant effect on the dependent variable. A higher F-ratio indicates that the regression model explains a significant amount of variance in the dependent variable compared to the residual variance.
 
 The null hypothesis (\( H_0 \)) and alternative hypothesis (\( H_a \)) for the F-ratio are stated as follows:
@@ -183,11 +194,25 @@ For each individual predictor \( \beta_i \), we also test the following hypothes
 
 Each predictor's significance is typically assessed using a t-test, which tests whether the estimated coefficient differs significantly from zero.
 
-## Additional Analyses - Emily
+## Additional Analyses
 
-Talk about stepwise regression – discuss what it does and its limitations
+In addition, we conducted stepwise regression to identify the most important predictors of median house values in Philadelphia. Stepwise regression is a variable selection technique that automatically selects the best subset of predictors for the model. It involves adding or removing predictors based on their statistical significance, with the goal of creating a parsimonious model that explains the most variance in the dependent variable. 
 
-Talk about k-fold cross-validation (mentioning that k = 5) – discuss what it is used for, describe how it is operationalized and mention that the RMSE is used to compare models (explain what the RMSE is and how it is calculated, presenting and describing any relevant formulas).
+We acknowledge several limitations of stepwise regression. First, the final model selected by stepwise regression is not guaranteed to be optimal in any specific sense. There may be other models that are just as good, or even better, than the one identified through this process. Additionally, the method yields only a single final model, even though multiple models could provide equally valid or informative predictions. Moreover, stepwise regression does not take into account the researcher's domain knowledge regarding the predictors. Important variables may be excluded unless manually forced into the model, which can lead to an incomplete or inaccurate understanding of the relationships between the variables. This method also runs the risk of Type I and Type II errors—meaning it may include unimportant variables or exclude important ones.
+
+We also performed K-fold cross-validation to assess the predictive performance of the model. Cross-validation is a resampling technique used to evaluate the performance of a predictive model. In K-fold cross-validation, the dataset is divided into K subsets or folds. The model is trained on K-1 folds and tested on the remaining fold. This process is repeated K times, with each fold serving as the test set exactly once. The performance of the model is then averaged across the K folds to provide an overall estimate of predictive accuracy. In our analysis, we used K = 5, which is a common choice for cross-validation. The root mean squared error (RMSE) is used to compare the performance of different models. The RMSE is a measure of the differences between predicted and observed values, with lower values indicating better predictive accuracy. In previous analysis, we have calculated the sum of squared errors (SSE) as follows:
+
+$$ \text{SSE} = \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 $$
+
+Then the mean square errors (MSE) is simply: 
+
+$$ \text{MSE} = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 $$
+
+And the root mean square error (RMSE) is the square root of the MSE: 
+
+$$
+\text{RMSE} = \sqrt{\text{MSE}}
+$$
 
 ## Software and Pacakges 
 
@@ -206,7 +231,9 @@ For our data analysis, we are utilizing the R programming language. The followin
 
 # Results
 
-## Exploratory Results - Ziyi
+## Exploratory Results
+
+We began by summarizing the statistical data for median house values and various socio-economic predictors. The median house value has an average of \$66,287.73, with a standard deviation of \$60,006.08. This is significantly lower than both the county and state averages and shows considerable variation in house values. For educational attainment, 16.08% of individuals hold a Bachelor’s degree or higher, much lower than the state average of 35.3%. The standard deviation of 17.77% suggests notable variability in this measure. The average number of households living in poverty is 189.77, with a wide range reflected by a standard deviation of 164.32. Vacant houses make up an average of 11.29%, slightly higher than the state average of 9.4%, with a standard deviation of 9.63%. Finally, single house units account for an average of 9.23%, with a standard deviation of 13.25%. 
 
 ```{r mean and sd, message=FALSE, warning=FALSE}
 
@@ -248,8 +275,7 @@ dist_results %>%
 
 ```
 
-We began by summarizing the statistical data for median house values and various socio-economic predictors. The median house value has an average of \$66,287.73, with a standard deviation of \$60,006.08. This is significantly lower than both the county and state averages and shows considerable variation in house values. For educational attainment, 16.08% of individuals hold a bachelor’s degree or higher, much lower than the state average of 35.3%. The standard deviation of 17.77% suggests notable variability in this measure. The average number of households living in poverty is 189.77, with a wide range reflected by a standard deviation of 164.32. Vacant houses make up an average of 11.29%, slightly higher than the state average of 9.4%, with a standard deviation of 9.63%. Finally, single house units account for an average of 9.23%, with a standard deviation of 13.25%. 
-
+According to the histograms, none of the distributions of the dependent and independent variables were normal. To address this, we applied a logarithmic transformation to the variables. 
 
 ```{r histograms, fig.height=7, fig.width=9, message=FALSE, warning=FALSE}
 
@@ -281,7 +307,9 @@ data %>%
 
 ```
 
-According to the histograms above, the original distributions were not normal. To address this, we applied a logarithmic transformation to the variables. 
+This transformation has helped to normalize some of the distributions, particularly for variables like median house value, number of households in poverty, and percentage of vacant houses. These variables now display more symmetric, bell-shaped distributions. However, for variables like the percentage of individuals with a bachelor’s degree and percentage of single house units, the transformation was less effective, and they still deviate from a normal distribution. 
+
+Moving forward, we will use the log-transformed results for our analysis. The remaining regression assumptions will be examined in detail in a separate section titled Regression Assumption Checks.
 
 ```{r log variables, message=FALSE, warning=FALSE}
 
@@ -325,51 +353,26 @@ reg_data %>%
 
 ```
 
-This transformation has helped normalize some of the distributions, particularly for variables like median house value, number of households in poverty, and percentage of vacant houses. These variables now display more symmetric, bell-shaped distributions. However, for variables like the percentage of individuals with a bachelor’s degree and percentage of single house units, the transformation was less effective, and they still deviate from a normal distribution. 
-
-Moving forward, we will use the log-transformed results for our analysis. The remaining regression assumptions will be examined in detail in a separate section titled Regression Assumption Checks.
+The choropleth maps of the dependent variable and the predictor variables reveal several notable patterns. In particular, the map of median house values shows higher values in the northwest Philadelphia and center city while lower values in the south and west of Philadelphia. This pattern is consistent with the distribution of single house units and the percentage of individuals with a bachelor's degree or higher, which also exhibit higher concentrations in the northwest and center city. In contrast, the maps of households living in poverty and vacant housing units show higher concentrations in the north, west, and parts of the south of Philadelphia. These patterns suggest an inverse relationship between poverty and vacant housing with educational attainment and single-family homeownership. It also appears that there might some degree of multicolinearity between percentage of population with a bachelor's degree or higher and percentage of single family units, given that they share similar spatial patterns. 
 
 
-```{r corr plot, message=FALSE, warning=FALSE}
-
-custom_labels <- c(
-  "% of Individuals with Bachelor’s Degrees or Higher" = "PCTBACHMOR",
-  "% of Vacant Houses" = "PCTVACANT",
-  "% of Single House Units" = "PCTSINGLES",
-  "# Households Living in Poverty" = "LNNBELPOV100"
-)
-
-cor_matrix <- cor(reg_data %>% dplyr::select(PCTBACHMOR, PCTVACANT, PCTSINGLES, LNNBELPOV100))
-rownames(cor_matrix) <- names(custom_labels)
-colnames(cor_matrix) <- names(custom_labels)
-
-ggcorrplot(cor_matrix, 
-           type = "lower", 
-           lab = TRUE, 
-           lab_size = 3, 
-           colors = c("#283d3b", "white", "#c44536")) +
-  labs(title = "Correlation Matrix for all Predictor Variables") +
-  theme(plot.subtitle = element_text(size = 9, face = "italic"),
-        plot.title = element_text(size = 12, face = "bold"), 
-        axis.text.x = element_text(size = 7),
-        axis.text.y = element_text(size = 7), 
-        axis.title = element_text(size = 8))
-```
-
-The choropleth maps of the dependent variable and the predictor variables reveal several notable patterns. The map displaying the percentage of individuals with a bachelor's degree or higher shows similarities to the map depicting the percentage of single-family housing units, both highlighting higher concentrations in the northwest, with additional clusters in Center City and the far northeast. In contrast, the maps illustrating households living in poverty and vacant housing share similar patterns, showing higher concentrations in the north, west, and parts of the south of the city. This suggests an inverse relationship between poverty and vacant housing with educational attainment and single-family homeownership, which is consistent with the correlation matrix.
 
 Although some pairs of independent variables share general spatial patterns, they do not appear to be strongly correlated, and no severe multicollinearity is assumed. The correlation matrix validates this assumption, as no predictor pairs show very high correlations. 
 
 Moreover, the dependent variable, median housing value, appears to follow a pattern similar to educational attainment and single-family homeownership, while demonstrating an opposite trend to poverty and vacant housing. Based on these visualizations, we can expect educational attainment, specifically the percentage of individuals with a bachelor's degree or higher, to have the strongest association with the dependent variable, as these maps exhibit the most similar patterns.
 
-Present the choropleth maps of the dependent variable and the predictors. Refer to the maps in the text, and talk about the following: Which maps look similar? Which maps look different? That is, which predictors do you expect to be strongly associated with the dependent variable based on the visualization? Also, given your examination of the maps, are there any predictors that you think will be strongly inter-correlated? That is, do you expect severe multicollinearity to be an issue here? Discuss this in a paragraph.
 
-Does the correlation matrix support your conclusions based on your visual comparison of predictor maps? 
+```{r read in shapefile, message=FALSE, warning=FALSE, include=FALSE}
+
+philly <- st_read(here("data","shapefile", "RegressionData.shp"))
+
+```
+
+<div style="text-align: center;">
 
 ```{r choropleth, message=FALSE, warning=FALSE}
 
 # choropleth maps of predictor and dependent variables
-philly <- st_read(here("data","shapefile", "RegressionData.shp"))
 ggplot(philly) +
   geom_sf(aes(fill = LNMEDHVAL), color = "transparent") +
   scale_fill_gradientn(colors = c("#FAF9F6", "#c44536"), 
@@ -389,7 +392,7 @@ ggplot(philly) +
 
 ```
 
-```{r more choropleth, fig.height=11, fig.width=14, message=FALSE, warning=FALSE}
+```{r more choropleth, fig.height=12, fig.width=15, message=FALSE, warning=FALSE}
 
 map_pctvacant <- ggplot(philly) +
   geom_sf(aes(fill = PCTVACANT), color = "transparent") +
@@ -463,6 +466,34 @@ map_lnbelpov100 <- ggplot(philly) +
 map_pctvacant + map_pctsingles + map_pcbachmore + map_lnbelpov100 + 
   plot_layout(ncol = 2)
 ```
+
+```{r corr plot, message=FALSE, warning=FALSE}
+
+custom_labels <- c(
+  "% of Individuals with Bachelor’s Degrees or Higher" = "PCTBACHMOR",
+  "% of Vacant Houses" = "PCTVACANT",
+  "% of Single House Units" = "PCTSINGLES",
+  "# Households Living in Poverty" = "LNNBELPOV100"
+)
+
+cor_matrix <- cor(reg_data %>% dplyr::select(PCTBACHMOR, PCTVACANT, PCTSINGLES, LNNBELPOV100))
+rownames(cor_matrix) <- names(custom_labels)
+colnames(cor_matrix) <- names(custom_labels)
+
+ggcorrplot(cor_matrix, 
+           type = "lower", 
+           lab = TRUE, 
+           lab_size = 3, 
+           colors = c("#283d3b", "white", "#c44536")) +
+  labs(title = "Correlation Matrix for all Predictor Variables") +
+  theme(plot.subtitle = element_text(size = 9, face = "italic"),
+        plot.title = element_text(size = 12, face = "bold"), 
+        axis.text.x = element_text(size = 7),
+        axis.text.y = element_text(size = 7), 
+        axis.title = element_text(size = 8))
+```
+
+
 
 ## Regression Results - Emma
 *Present the regression output from R. Be sure that your output presents the parameter estimates (and associated standard errors, t-statistics and p-values), as well as the R2, the adjusted R2, and the relevant F-ratio and associated p-value.
