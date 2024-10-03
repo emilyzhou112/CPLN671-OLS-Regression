@@ -739,7 +739,6 @@ print(cvlm_model_reduced)
 
 # Discussion and Limitations
 
-
 In summary, in this report, we conducted a multiple regression to examine the relationship between median house value (the dependent variable) and four independent variables: vacancy rates (PCTVACANT), percentage of single-family housing (PCTSINGLES), educational attainment (PCTBACHMOR), and poverty levels (LNNBELPOV100). 
 
 Our findings show that all four predictors were statistically significant. Specifically, vacancy rates and poverty levels had a negative impact on median house value, while single-family housing and educational attainment had a positive influence. The fact that educational attainment was highly significant and positively related to house value is not surprising, as areas with higher education levels tend to attract higher-income households. Similarly, the negative effect of vacancy rates and poverty levels aligns with expectations, as these factors typically lower property values.
@@ -752,21 +751,11 @@ While the four-predictor model shows better predictive accuracy, there are likel
 
 In addition to this limitation of not including some potentially important predictors, we have to acknowledge there are some other limitations in terms of meeting the regression assumptions. One key assumption of OLS regression is that linear relationships exist between the dependent and independent variables. While the scatter plots showed that PCTBACHMOR had a clear linear relationship with median house value, the relationships for PCTVACANT, PCTSINGLES, and LNNBELPOV100 were more complex and not entirely linear. This suggests that the model may not fully capture the underlying dynamics of these predictors and their impact on house values. 
 
-
 Another key assumption is the independence of observations, which is violated due to spatial autocorrelation. This suggests that the model may not fully account for the spatial dependencies in the data, which could lead to biased parameter estimates and inaccurate predictions. To address this limitation, future analyses could explore spatial regression techniques, such as spatial lag or spatial error models, to account for spatial autocorrelation and improve model performance.
 
-independence of observations
+On top of that, for our current model, we are using the raw number of households living in poverty (LNNBELPOV100) as a predictor. The raw count does not account for differences in population size across neighborhoods, which could lead to misleading results. Larger neighborhoods with more households may naturally have more households in poverty, even if the poverty rate is relatively low. A more meaningful measure would be to use the percentage of households in poverty, which normalizes the data across neighborhoods, providing a better sense of poverty's prevalence relative to the overall population.
 
-
-
-
-c)	If you haven’t done that in the Results section, talk explicitly about the limitations of the model – that is, mention which assumptions were violated, and if applicable, how that may affect the model/parameter estimation/estimated significance. 
-In addition, talk about the limitations of using the NBELPOV100 variable as a predictor – that is, what are some limitations of using the raw number of households living in poverty rather than a percentage?
-
-
-
-**Would it make sense to run Ridge or LASSO regression here? Explain briefly (~4-5 sentences) what these methods are, when they’re used, and why they would or would not be appropriate here.**
-
+### Possibility of Ridge or LASSO Regression
 
 Ridge and LASSO regression are regularization techniques used to address multicollinearity and overfitting in models with many predictors. Ridge regression penalizes the size of the coefficients, shrinking them towards zero but keeping all predictors in the model, which is useful when all predictors are believed to contribute to the outcome. LASSO (Least Absolute Shrinkage and Selection Operator) goes a step further by forcing some coefficients to be exactly zero, effectively performing variable selection.
 
