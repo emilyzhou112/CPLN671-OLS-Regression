@@ -1,6 +1,6 @@
 ---
 title: "Using OLS Regression to Predict Median House Values in Philadelphia"
-author: "Emily, Ziyi, Emma"
+author: "Emily Zhou, Ziyi Guo, Emma Jiang"
 date: "`r Sys.Date()`"
 output:
   html_document:
@@ -19,7 +19,7 @@ editor_options:
 
 Version 2.0 \| First Created Sep 26, 2024 \| Updated Oct 4, 2024
 
-Keywords: Ordinary Least Square Regression, K-fold Cross Validation, Sum of Square Errors, Root Mean Squared Error, Stepwise AIC, 
+Keywords: Ordinary Least Square Regression, K-fold Cross Validation, Sum of Square Errors, Root Mean Squared Error, Stepwise AIC
 
 
 ```{r setup, include=FALSE}
@@ -64,6 +64,8 @@ To better understand the potential factors influencing housing values in Philade
 Educational attainment is closely tied to economic outcomes and this includes property values. Studies suggest that areas with higher levels of education tend to have more robust local economies, higher incomes, and increased demand for housing, which pushes up home values @Scott2012. High vacancy rates are typically associated with declining neighborhoods and lower median house values. Vacant properties can be signs of economic distress, contributing to neighborhood decline through reduced upkeep, higher crime rates, and a negative perception of the area @mallach2018empty. In Philadelphia, the issue of vacancy has been particularly problematic in certain neighborhoods, where a large number of abandoned properties has led to significant reductions in housing values @kromer2002vacant.
 
 The proportion of single-family homes in an area can also influence housing values, depending on the local market. Single-family homes are generally more desirable in many U.S. housing markets, as they offer more space, privacy, and perceived stability compared to multi-family units @glaeser2018economic. Research also consistently demonstrates a strong correlation between poverty levels and housing values. Areas with higher poverty rates often experience reduced demand for housing, as well as diminished investment in local infrastructure and services, which in turn can lead to lower property values @Galster2008. 
+
+In this study, we aim to explore the relationships between these socio-economic factors and median house values in Philadelphia using Ordinary Least Squares (OLS) regression. By analyzing these relationships, we hope to identify the key predictors of housing values in the city and provide insights that can inform policy decisions, urban planning strategies, and community development initiatives. 
 
 # Methods
 
@@ -311,7 +313,7 @@ This transformation has helped to normalize some of the distributions, particula
 
 Moving forward, we will use the log-transformed results for our analysis. The remaining regression assumptions will be examined in detail in a separate section titled Regression Assumption Checks.
 
-```{r log variables, message=FALSE, warning=FALSE}
+```{r log variables, message=FALSE, warning=FALSE, include=FALSE}
 
 # log the variables
 
@@ -361,7 +363,6 @@ philly <- st_read(here("data","shapefile", "RegressionData.shp"))
 
 ```
 
-<div style="text-align: center;">
 
 ```{r choropleth, message=FALSE, warning=FALSE}
 
@@ -460,6 +461,7 @@ map_pctvacant + map_pctsingles + map_pcbachmore + map_lnbelpov100 +
   plot_layout(ncol = 2)
 ```
 
+
 The correlation matrix supports our observations from the map. There's a positive linear relationship between the percentage of people with at least a Bachelor's Degree or higher and the percentage of single-family units, with a correlation coefficient of 0.2. The percentage of households living below the poverty line also positively correlated with the percentage of vacant houses, with a correlation coefficient of 0.25. These correlations suggest that the predictors are related to each other, but since none of these correlations exceed 0.8, we can proceed with the regression analysis without concerns about multicollinearity.
  
 
@@ -492,23 +494,35 @@ ggcorrplot(cor_matrix,
 
 ## Regression Results
 
-*Present the regression output from R. Be sure that your output presents the parameter estimates (and associated standard errors, t-statistics and p-values), as well as the R2, the adjusted R2, and the relevant F-ratio and associated p-value.*
-
-*Referencing the regression output in (i) above, interpret the results as in the example included above this report outline.*
-
 ### Parameter Estimates
 
 Four independent variables, the proportion of vacant housing units (PCTVACANT), the proportion of single-family detached homes (PCTSINGLES), the proportion of residents with at least a Bachelor's degree (PCTBACHMOR), and the number of log-transformed households living below the poverty line (LNNBELPOV100), were regressed to predict the median log-transformed home values (LNMEDHVAL) for the Philadelphia census block group. 
 
 The regression output tells us that the median home values are highly significant and are associated with the proportion of single-family detached homes(PCTSINGLES), the proportion of residents with at least a Bachelor's degree (PCTBACHMOR), the proportion of vacant housing units (PCTVACANT), and the number of log-transformed households living below the poverty line (LNNBELPOV100), with $p < 0.001$ for all predictors.
 
-As the proportions of vacant housing units (PCTVACANT) goes up by one unit (i.e.percentage point), the expected change in median home value is $(e^{\beta} - 1) \times 100\% = (e^{-0.0191569} - 1) \times 100\% \approx -1.897\% $. That is, as percentage of population living in poverty goes up by 1 unit (1%), median home value goes down by approximately 1.897%, holding other predictors constant. The p-value of of less than 0.0001 for PCTVACANT tells us that if there is actually no relationship between PCTVACANT and the dependent variable (i.e., if the null hypothesis that \( \beta_1 = 0 \) is actually true), then the probability of getting a \( \beta_1 \) coefficient estimate of -0.0191569 is less than 0.0001.
+As the proportions of vacant housing units (PCTVACANT) goes up by one unit (i.e.percentage point), the expected change in median home value is: 
 
-Similarly, as the proportion of single-family detached homes (PCTSINGLES) goes up by one unit (i.e.percentage point), the expected change in median home value is $(e^{\beta} - 1) \times 100\% = (e^{0.0029769} - 1) \times 100\% \approx 0.298\% $. That is, as percentage of population living in poverty goes up by 1 unit (1%), median home value goes up by approximately 0.298%, holding other predictors constant. The p-value of of less than 0.0001 for PCTSINGLES tells us that if there is actually no relationship between PCTSINGLES and the dependent variable (i.e., if the null hypothesis that \( \beta_2 = 0 \) is actually true), then the probability of getting a \( \beta_2 \) coefficient estimate of 0.0029769 is less than 0.0001.
+$$(e^{\beta} - 1) \times 100\% = (e^{-0.0191569} - 1) \times 100\% \approx -1.897\% $$
 
-Moreover, as the proportion of people with a Bachelor's degree or higher (PCTBACHMOR) goes up by one unit (i.e.percentage point), the expected change in median home value is $(e^{\beta} - 1) \times 100\% = (e^{0.0209098} - 1) \times 100\% \approx 2.11\% $. That is, as percentage of population with a Bachelor's degree or higher goes up by 1 unit (1%), median home value goes up by approximately 2.1%, holding other predictors constant. The p-value of of less than 0.0001 for PCTBACHMOR tells us that if there is actually no relationship between PCTBACHMOR and the dependent variable (i.e., if the null hypothesis that \( \beta_3 = 0 \) is actually true), then the probability of getting a \( \beta_3 \) coefficient estimate of 0.0209098 is less than 0.0001.
+That is, as percentage of population living in poverty goes up by 1 unit (1%), median home value goes down by approximately 1.897%, holding other predictors constant. The p-value of of less than 0.0001 for PCTVACANT tells us that if there is actually no relationship between PCTVACANT and the dependent variable (i.e., if the null hypothesis that \( \beta_1 = 0 \) is actually true), then the probability of getting a \( \beta_1 \) coefficient estimate of -0.0191569 is less than 0.0001.
 
-And finally, as the number of log-transformed households living below the poverty line (LNNBELPOV100) changes by 1%, the expected value of median home value changes by $(1.01^{\beta} - 1) \times 100\% = (1.01^{-0.0789054} - 1) \times 100\%  \approx -0.078\%$. That is, as the number of households living below the poverty line goes up 1%, median home value changes by -0.078%, holding % in other predictors constant. The p-value of of less than 0.0001 for LNNBELPOV100 tells us that if there is actually no relationship between LNNBELPOV100 and the dependent variable (i.e., if the null hypothesis that \( \beta_4 = 0 \) is actually true), then the probability of getting a \( \beta_4 \) coefficient estimate of -0.0789054 is less than 0.0001.
+Similarly, as the proportion of single-family detached homes (PCTSINGLES) goes up by one unit (i.e.percentage point), the expected change in median home value is: 
+
+$$(e^{\beta} - 1) \times 100\% = (e^{0.0029769} - 1) \times 100\% \approx 0.298\% $$
+
+That is, as percentage of population living in poverty goes up by 1 unit (1%), median home value goes up by approximately 0.298%, holding other predictors constant. The p-value of of less than 0.0001 for PCTSINGLES tells us that if there is actually no relationship between PCTSINGLES and the dependent variable (i.e., if the null hypothesis that \( \beta_2 = 0 \) is actually true), then the probability of getting a \( \beta_2 \) coefficient estimate of 0.0029769 is less than 0.0001.
+
+Moreover, as the proportion of people with a Bachelor's degree or higher (PCTBACHMOR) goes up by one unit (i.e.percentage point), the expected change in median home value is: 
+
+$$(e^{\beta} - 1) \times 100\% = (e^{0.0209098} - 1) \times 100\% \approx 2.11\% $$ 
+
+That is, as percentage of population with a Bachelor's degree or higher goes up by 1 unit (1%), median home value goes up by approximately 2.1%, holding other predictors constant. The p-value of of less than 0.0001 for PCTBACHMOR tells us that if there is actually no relationship between PCTBACHMOR and the dependent variable (i.e., if the null hypothesis that \( \beta_3 = 0 \) is actually true), then the probability of getting a \( \beta_3 \) coefficient estimate of 0.0209098 is less than 0.0001.
+
+And finally, as the number of log-transformed households living below the poverty line (LNNBELPOV100) changes by 1%, the expected value of median home value changes by 
+
+$$(1.01^{\beta} - 1) \times 100\% = (1.01^{-0.0789054} - 1) \times 100\%  \approx -0.078\%$$
+
+That is, as the number of households living below the poverty line goes up 1%, median home value changes by -0.078%, holding % in other predictors constant. The p-value of of less than 0.0001 for LNNBELPOV100 tells us that if there is actually no relationship between LNNBELPOV100 and the dependent variable (i.e., if the null hypothesis that \( \beta_4 = 0 \) is actually true), then the probability of getting a \( \beta_4 \) coefficient estimate of -0.0789054 is less than 0.0001.
 
 All of these low probabilities indicate that we can safely reject $H_0: \beta_1 = 0$ for $H_a: \beta_1 \neq 0$, $H_0: \beta_2 = 0$ for $H_a: \beta_2 \neq 0$, $H_0: \beta_3 = 0$ for $H_a: \beta_3 \neq 0$, and $H_0: \beta_4 = 0$ for $H_a: \beta_4 \neq 0$ (at most reasonable levels of $\alpha = P(\text{Type I error})$).
 
@@ -535,18 +549,13 @@ anova_table
 
 ```
 
-## Regression Assumption Check - Emma
+## Regression Assumption Check 
 
-*First state that in this section, you will be talking about testing model assumptions. State that you have already looked at the variable distributions earlier.
-
-*Present scatter plots of the dependent variable and each of the predictors.  State whether each of the relationships seems to be linear, as assumed by the regression model. [Hint: they will not look linear.]
-
-In this section, 
-
+In this section, we conducted a variety of analyses to check if the assumptions of the linear regression model were met. Earlier in this report, we have already checked for variable distribution (see the stats table above) and multicolinearity (see the corr diagram above). Thus, we began here by examining the **linearity** assumption of the model. We created scatter plots of the dependent variable (LNMEDHVAL) against each of the predictors (PCTVACANT, PCTSINGLES, PCTBACHMOR, and LNNBELPOV100). 
 
 The scatter plot for PCTVACANT shows a general negative relationship between the proportion of vacant housing units and LNMEDHVAL. In the graph, there are clusters of block groups where high vacancy rates correspond to lower housing values, particularly on the left side of the plot where the values of LNMEDHVAL are higher. However, the plot is not perfectly linear. Instead, it reveals a more complex relationship with significant variation in housing values across different vacancy rates. In the middle and lower ranges of vacancy rates, the decline in housing values becomes less pronounced. This suggests that while vacant housing is associated with lower property values, the impact diminishes or becomes less predictable as the vacancy rate changes.
 
-In the scatter plot for PCTSINGLES, a weakly positive trend is observed, though the points are scattered widely around the line, indicating a weak linear relationship. As the percentage of single-family homes increases, the values of LNMEDHVAL tend to increase, but this pattern is not consistent across all block groups. The scatter of points shows significant variability in housing values at various levels of single-family housing, with some block groups exhibiting high values even at lower percentages of single-family homes. This variability suggests that while there is a positive association between single-family housing and higher values, the relationship is more nuanced, and other factors may be influencing house values at the same time.
+In the scatter plot for PCTSINGLES, a weak positive trend can be observed, though the points are scattered widely around the line, indicating a weak linear relationship. As the percentage of single-family homes increases, the values of LNMEDHVAL tend to increase, but this pattern is not consistent across all block groups. The scatter of points shows significant variability in housing values at various levels of single-family housing, with some block groups exhibiting high values even at lower percentages of single-family homes. This variability suggests that while there is a positive association between single-family housing and higher values, the relationship is more nuanced, and other factors may be influencing house values at the same time.
 
 The scatter plot for PCTBACHMOR, however, shows a much clearer linear relationship. As the proportion of residents with at least a bachelor’s degree increases, the LNMEDHVAL values increase in a more consistent and linear fashion. The points on the graph form a relatively tight band along a positive trend line, indicating that higher education levels within a neighborhood are strongly associated with higher housing values. The consistent upward trend in this graph suggests that educational attainment is a key driver of housing prices, and the linear relationship implies that this variable is well-suited for inclusion in the linear regression model.
 
@@ -583,19 +592,17 @@ ggplot(aes(x = Value, y = LNMEDHVAL)) +
 
 ```
 
-*Present the histogram of the standardized residuals. State whether the residuals look normal.
-
-The histogram of standardized residuals provides a detailed view of the distribution of the residuals from the OLS regression model. This graph presents the frequency of residual values along the x-axis, with the residuals centered around zero. The shape of the histogram approximates a bell curve, which is characteristic of a normal distribution—a key assumption for OLS regression.
+Next, we examined the assumption of **normality for residuals** of the regression model. The histogram of standardized residuals provides a detailed view of the distribution of the residuals from the OLS regression model. This graph maps the frequency of residual values along the x-axis, with the residuals centered around zero. The shape of the histogram approximates a bell curve, which is characteristic of a normal distribution—a key assumption for OLS regression.
 
 The majority of the residuals are concentrated between -2 and 2 on the x-axis, with the highest frequency occurring near zero. This concentration suggests that most of the predicted values are close to the observed values, leading to residuals that are small and distributed symmetrically around zero. This is a positive sign, as it indicates that the model does not systematically overpredict or underpredict the dependent variable (LNMEDHVAL).
 
 At the center of the distribution, the residuals form a tall, narrow peak, representing a large number of residuals close to zero. This suggests that the model fits most observations well. As we move further away from the center, the frequency of residuals decreases symmetrically, with fewer residuals having large positive or negative values. This tapering off on both sides of the histogram suggests that extreme residuals are relatively rare, which is typical of a normal distribution.
 
-However, there are some noticeable deviations from perfect normality at the tails of the distribution. On the left side of the graph, there are a few residuals with values smaller than -3, and on the right side, there are a few residuals larger than 3. These residuals represent outliers—cases where the model’s predictions deviate significantly from the observed values. While these extreme values do not appear to dominate the distribution, they are worth further examination, as they could indicate areas where the model’s assumptions are being violated or where influential points might be affecting the overall model fit.
+However, there are some noticeable deviations from perfect normality at the tails of the distribution. On the left side of the graph, there are a few residuals with values smaller than -3, and on the right side, there are a few residuals larger than 3. These residuals represent outliers—cases where the model's predictions deviate significantly from the observed values. While these extreme values do not appear to dominate the distribution, they are worth further examination, as they could indicate areas where the model's assumptions are being violated or where influential points might be affecting the overall model fit.
 
 In summary, the histogram of standardized residuals indicates that the residuals are approximately normally distributed, which supports the assumption of normality for the regression model. Although there are some outliers present, their overall impact on the normality of the residuals seems minimal. The general shape of the histogram suggests that the OLS regression model fits the data reasonably well, with residuals mostly falling within an acceptable range around zero. 
 
-```{r compute residuals, message=FALSE, warning=FALSE}
+```{r compute residuals, message=FALSE, warning=FALSE, include=FALSE}
 
 fitted_values <- fitted(fit)
 residuals_values <- residuals(fit)
@@ -626,21 +633,13 @@ ggplot(reg_data, aes(x = Standardized_Residuals)) +
 
 ```
 
+Following the normality check, we examined the assumption of **homoscedasticity**, which requires that the residuals have constant variance across all levels of the fitted values. The scatter plot of standardized residuals versus fitted values is a valuable diagnostic for testing essential regression assumptions, including homoscedasticity and the presence of outliers. The fitted values that the model predicts are plotted on the x-axis, and the standardized residuals—that is, residuals adjusted by their standard deviation—are shown on the y-axis. Because standardized residuals give an indication of the standard deviation of each residual's divergence from the expected value, they make it simple to identify outliers and significant data points. Relatives are generally regarded as normal when they fall between -2 and +2, and anything outside of these bounds can lead to anomalous points that could have an impact on the model's performance.
 
-*Present the ‘Standardized Residual by Predicted Value’ scatter plot. What conclusions can you draw from that? Does there seem to be heteroscedasticity? Do there seem to be outliers? Anything else? Discuss. 
-Mention what standardized residuals are.
+Homoscedasticity, or the need that residuals show constant variance across all levels of fitted values, is one of the fundamental presumptions of regression. The residuals in this scatter plot show no discernible trend of rising or falling variance with increasing fitted values; instead, they seem to be pretty uniformly distributed around the horizontal line at zero. The fact that there is no obvious funnel shape or systematic variation trend suggests that the assumption of homoscedasticity is reasonably satisfied. The notion of constant variance is supported by the residuals' generally constant spread across the fitted value range, which indicates that the variance of errors is still stable.The symmetry of the residuals around the zero line is another positive aspect of the plot. This symmetry means that the model does not systematically over- or under-predict the dependent variable over the range of fitted values (LNMEDHVAL). 
 
-The scatter plot of standardized residuals vs fitted values is a valuable diagnostic for testing essential regression assumptions, including homoscedasticity and the presence of outliers. The fitted values that the model predicts are plotted on the x-axis, and the standardized residuals—that is, residuals adjusted by their standard deviation—are shown on the y-axis. Because standardized residuals give an indication of the standard deviation of each residual's divergence from the expected value, they make it simple to identify outliers and significant data points. Relatives are generally regarded as normal when they fall between -2 and +2, and anything outside of these bounds can lead to anomalous points that could have an impact on the model's performance.
-
-Homoscedasticity, or the need that residuals show constant variance across all levels of fitted values, is one of the fundamental presumptions of regression. The residuals in this scatter plot show no discernible trend of rising or falling variance with increasing fitted values; instead, they seem to be pretty uniformly distributed around the horizontal line at zero. The fact that there is no obvious funnel shape or systematic variation trend to suggest otherwise suggests that the assumption of homoscedasticity is reasonably satisfied. The notion of constant variance is supported by the residuals' generally constant spread across the fitted value range, which indicates that the variance of errors is still stable.
-
-However, the plot does show some potential outliers, particularly those points that are outside the range of the -3 and +3 standardised residuals. These extreme residuals are located above and below the main residual clusters and may indicate that the model's predicted values deviate significantly from the actual values. Although the number of outliers is relatively small, their presence indicates that the model may not fit all data points well. Outliers such as these may have a disproportionate impact on the model, potentially distorting parameter estimates and exaggerating error terms. Further investigation is needed to determine whether these outliers are due to data entry errors, represent unique situations, or highlight deficiencies in the model specification.
-
-The symmetry of the residuals around the zero line is another positive aspect of the plot. This symmetry means that the model does not systematically over- or under-predict the dependent variable over the range of fitted values (LNMEDHVAL). The symmetrical distribution of the residuals is consistent with a key assumption of ordinary least squares regression, which is that the residuals should have a mean of zero. The lack of significant bias in either direction suggests that the model is generally appropriate.
+However, the plot does show some potential outliers, particularly those points that are outside the range of the -3 and +3 standardized residuals. These extreme residuals are located above and below the main residual clusters and may indicate that the model's predicted values deviate significantly from the actual values. Although the number of outliers is relatively small, their presence indicates that the model may not fit all data points well. 
 
 In addition, although the residuals are generally well clustered around zero, some slight dispersion occurs as the fitted values increase, suggesting that the accuracy of the model predictions may decrease slightly at higher values of LNMEDHVAL. The higher the fitted value, the greater the residual variance, which may indicate the presence of slight heteroskedasticity, but not of sufficient severity to raise significant concerns about the validity of the model. However, this pattern could be explored further to ensure that the model performs well over the entire range of predicted values.
-
-Thus, scatter plots of standardised residuals versus fitted values indicate that the model generally satisfies the assumption of homoskedasticity and that the residuals show a consistent distribution among the fitted values. However, the presence of a few outliers and slight dispersion of higher values warrants further investigation. These diagnostic results suggest that the model fits the data reasonably well, but dealing with outliers and checking for leverage points could improve the robustness and predictive accuracy of the model.
 
 
 ```{r residual plot,  message=FALSE, warning=FALSE}
@@ -663,33 +662,10 @@ ggplot(reg_data, aes(x = Fitted, y = Standardized_Residuals)) +
 
 ```
 
-*Referencing the maps of the dependent variable and the predictors that you presented earlier, state whether there seems to be spatial autocorrelation in your variables. That is, does it seem that the observations (i.e., block groups) are independent of each other? Briefly discuss.
+Another assumption we test here is **independence of observations**, especially spatial autocorrelations. In the map of LNMEDHVAL (log-transformed median house values), there appears to be a spatial pattern, with higher values concentrated in certain areas, such as Center City and other affluent neighborhoods, and lower values clustered in more economically distressed areas. This suggests that the housing market is not spatially random and that nearby block groups tend to have similar house values. 
 
-In the map of LNMEDHVAL (log-transformed median house values), there appears to be a spatial pattern, with higher values concentrated in certain areas, such as Center City and other affluent neighborhoods, and lower values clustered in more economically distressed areas. This suggests that the housing market is not spatially random and that nearby block groups tend to have similar house values, indicative of positive spatial autocorrelation.
+Similarly, the map of PCTVACANT (proportion of vacant housing units) shows clear geographic clusters, with higher vacancy rates concentrated in certain parts of the city, particularly in areas experiencing economic decline. For PCTSINGLES (proportion of single-family homes), the maps reveal spatial patterns as well, with block groups characterised by a high proportion of single-family homes, often located in residential areas on the outskirts of a suburb or city. The PCTBACHMOR (proportion of Residents with at least a Bachelor's Degree) map shows a strong spatial pattern, with higher levels of educational attainment concentrated in the more affluent central areas of the city, while lower levels of educational attainment are concentrated in the peripheral areas, which have fewer economic resources. Unsurprisingly, The LNNBELPOV100 (log-transformed number of households living below the poverty line) map shows that in some parts of the city, particularly in economically distressed neighborhoods, there is a clear concentration of households with higher poverty rates. All of these suggests that observations (block groups) are not independent of each other and it is important to account for such dependencies in the model through geographic weighted regression techniques. 
 
-Similarly, the map of PCTVACANT (proportion of vacant housing units) shows clear geographic clusters, with higher vacancy rates concentrated in certain parts of the city, particularly in areas experiencing economic decline. This clustering pattern suggests that vacancy rates are spatially correlated, meaning that the vacancy rate in one block group is likely influenced by the rates in adjacent block groups.
-
-For PCTSINGLES (Proportion of single-family homes), the maps also reveal spatial patterns, with block groups characterised by a high proportion of single-family homes, often located in residential areas on the outskirts of a suburb or city. This spatial clustering implies that block groups with similar housing characteristics tend to be in close proximity to each other, suggesting potential spatial autocorrelation.
-
-The PCTBACHMOR (Proportion of Residents with at least a Bachelor's Degree) maps also show a strong spatial pattern, with higher levels of educational attainment concentrated in the more affluent central areas of the city, while lower levels of educational attainment are concentrated in the peripheral areas, which have fewer economic resources. This suggests that educational attainment is spatially correlated, with similar levels of education concentrated in geographically similar neighbourhood groups.
-
-The LNNBELPOV100 (log-transformed number of households living below the poverty line) map shows that in some parts of the city, particularly in economically distressed neighbourhoods, there is a clear concentration of households with higher poverty rates. This spatial concentration of poverty is indicative of positive spatial autocorrelation, whereby groups of neighbourhoods with higher poverty rates tend to be in close proximity to each other.
-
-In summary, the maps of both the dependent variable and the predictors indicate the presence of spatial autocorrelation, with distinct geographic patterns and clusters visible throughout the city. This suggests that observations (block groups) are not independent of each other, as values from nearby block groups are likely to influence each other. The presence of spatial autocorrelation highlights the importance of considering spatial relationships in the analysis, as failure to account for such dependencies may violate regression assumptions and lead to biased or inefficient estimates. The use of spatial regression techniques to better account for these spatial dependencies could be of great benefit to future analyses.
-
-*Now, present the choropleth map of the standardized regression residuals. Do there seem to be any noticeable spatial patterns in them? That is, do they seem to be spatially autocorrelated? You will examine the spatial autocorrelation of the variables and residuals and run spatial regressions in the next assignment. 
-
-The choropleth map of standardized regression residuals provides a detailed geographic breakdown of how well the OLS regression model fits the data across different areas of the city. The map uses a color gradient to represent the magnitude of the residuals, with darker red shades indicating large positive residuals (where the model underestimates the actual values), and lighter shades (toward white) indicating large negative residuals (where the model overestimates the actual values). The standardized residuals range from -6 to +6, offering insight into areas where the model's predictions diverge most from the observed values.
-
-From a spatial perspective, there are several noteworthy patterns in the map. In the northwestern part of the city, particularly along some of the more suburban and affluent areas, dark red shading indicates large positive residuals. This suggests that the model underestimates housing values in these neighborhoods, as the predicted values are consistently lower than the actual observed values. These areas are often characterized by higher-income households and larger single-family homes, suggesting that the model may not fully capture the higher market value trends in these regions, possibly due to unaccounted factors like proximity to high-demand amenities or specific neighborhood features that influence property values.
-
-In contrast, in sections of South and Southwest Philadelphia, as well as parts of North Philadelphia, lighter shaded areas indicate large negative residuals. Here, the model tends to overestimate housing values, meaning that the predicted values are higher than the actual observed values. These neighborhoods may be facing economic challenges, such as higher vacancy rates, lower household incomes, or poverty, which the model has difficulty fully capturing through the selected predictors. The residuals in these areas suggest that housing markets in these neighborhoods are more complex and influenced by localized factors not fully represented in the regression model, such as higher levels of economic distress or neighborhood disinvestment.
-
-Additionally, some central neighborhoods near Center City display more neutral residuals, where the model's predictions are relatively accurate, with values closer to zero. These areas appear in lighter red or pink shades, indicating that the model is performing reasonably well in these parts of the city. This may be because the central areas are more homogeneous in terms of housing values and more likely to align with the trends captured by the model's predictors, such as education levels and vacancy rates.
-
-The overall pattern observed in the map suggests spatial clustering, as block groups with similar residual values tend to be geographically close to each other. For instance, in the northwest, large positive residuals form a contiguous cluster, while large negative residuals are clustered in certain distressed areas of the city. This clustering effect points to the presence of spatial autocorrelation in the residuals, meaning that the model's errors are not randomly distributed, but instead show clear geographic trends.
-
-In other words, therefore, the longitudinal plots of standardised residuals reveal significant spatial patterns, suggesting that the regression model performs differently across communities. The model tends to underestimate housing values in more affluent suburbs and overestimate housing values in economically distressed communities. The spatial pattern of these residuals suggests that there are other geographic or spatial factors that influence housing values that are not fully accounted for in the model. This highlights the need for further spatial analyses, such as incorporating spatial regression models, to account for these dependencies and improve the accuracy of the models. By addressing spatial autocorrelation, future models could provide more accurate forecasts and better insight into the spatial dynamics of housing markets across the city.
 
 ```{r residual maps, message=FALSE, warning=FALSE}
 
@@ -716,11 +692,23 @@ philly %>%
 
 ```
 
+The choropleth map of standardized regression residuals provides a detailed geographic breakdown of how well the OLS regression model fits the data across different areas of the city. The map uses a color gradient to represent the magnitude of the residuals, with darker red shades indicating large positive residuals (where the model underestimates the actual values), and lighter shades (toward white) indicating large negative residuals (where the model overestimates the actual values). 
 
-## Additional Analyses - Ziyi
+In the northwestern part of the city, particularly along some of the more suburban and affluent areas, dark red shading indicates large positive residuals. This suggests that the model underestimates housing values in these neighborhoods. These areas are often characterized by higher-income households and larger single-family homes, suggesting that the model may not fully capture the higher market value trends in these regions, possibly due to unaccounted factors like proximity to high-demand amenities or specific neighborhood features that influence property values.
 
+In contrast, in parts of South and Southwest Philadelphia, as well as parts of North Philadelphia, lighter shaded areas indicate large negative residuals. Here, the model tends to overestimate housing values, meaning that the predicted values are higher than the actual observed values. These neighborhoods may be facing economic challenges, such as higher vacancy rates, lower household incomes, or poverty, which the model has difficulty fully capturing through the selected predictors. The residuals in these areas suggest that housing markets in these neighborhoods are more complex and influenced by localized factors not fully represented in the regression model, such as higher levels of economic distress or neighborhood disinvestment.
 
-Present the results of the stepwise regression and state whether all 4 predictors in the original model are kept in the final model.
+Some neighborhoods near Center City display more neutral residuals, where the model's predictions are relatively accurate, with values closer to zero. These areas appear in lighter red or pink shades, indicating that the model is performing reasonably well in these parts of the city. This may be because the central areas are more homogeneous in terms of housing values and more likely to align with the trends captured by the model's predictors, such as education levels and vacancy rates.
+
+The overall pattern observed in the map suggests spatial clustering, as block groups with similar residual values tend to be geographically close to each other. The model tends to underestimate housing values in more affluent suburbs and overestimate housing values in economically distressed communities. This highlights the need for further improvement to address spatial auto-correlations. 
+
+## Additional Analyses
+
+We performed stepwise regression to determine the most relevant predictors for the model. The initial model included all four predictors, with a residual sum of squares (RSS) of 230.34 and an Akaike Information Criterion (AIC) of -3448.07, where a lower AIC indicates a better balance between goodness of fit and model complexity.
+
+During the stepwise procedure, the process examined whether removing each predictor would reduce the AIC and improve the model. However, removing any predictor resulted in a higher AIC and an increase in RSS, indicating a poorer model fit. For instance, removing PCTSINGLES increased the RSS to 232.75 and the AIC to -3432.2, while removing LNNBELPOV100 increased the RSS to 242.04 and the AIC to -3364.9. Removing PCTVACANT had a more substantial impact, increasing the RSS to 281.89 and the AIC to -3102.7. Finally, removing PCTBACHMOR caused the RSS to jump to 429.36 and the AIC to -2379.0, indicating a severe decline in model performance.
+
+Given these results, none of the predictors were removed, as eliminating any of them worsened the fit of the model. Therefore, the final model remained unchanged from the initial one, including all four predictors. The final model had a residual deviance of 230.34 and an AIC of -3448.07, indicating that the model successfully balanced complexity with fit.
 
 ```{r stepwise regression, message=FALSE, warning=FALSE}
 
@@ -729,7 +717,7 @@ stepwise_model$anova
 
 ```
 
-Present the cross-validation results – that is, compare the RMSE of the original model that includes all 4 predictors with the RMSE of the model that only includes PCTVACANT and MEDHHINC as predictors.
+We performed cross-validation to assess the model's predictive accuracy and determine whether a reduced model with fewer predictors could provide similar performance. The original model, which includes all four predictors, has a lower RMSE (0.3676) compared to the reduced model with only two predictors (0.4424). This indicates that the original model provides better predictive accuracy. The increase in RMSE when removing the additional predictors (PCTSINGLES and LNNBELPOV100) suggests that excluding these variables results in a less accurate model. Overall, the original model outperforms the reduced model, demonstrating that all four predictors contribute to improved model accuracy.
 
 ```{r cross validation, message=FALSE, warning = FALSE}
 
@@ -741,6 +729,7 @@ print(cvlm_model)
 
 ```
 
+
 ```{r reduce cv model,message=FALSE, warning=FALSE}
 
 cvlm_model_reduced = train(LNMEDHVAL ~ PCTVACANT + MEDHHINC, data = reg_data, method = "lm", trControl = lm)
@@ -748,21 +737,41 @@ cvlm_model_reduced = train(LNMEDHVAL ~ PCTVACANT + MEDHHINC, data = reg_data, me
 print(cvlm_model_reduced)
 ```
 
-# Discussion and Limitations - Emily
-
-a)	Recap what you did in the paper and your findings. Discuss what conclusions you can draw, which variables were significant and whether that was surprising or not.
+# Discussion and Limitations
 
 
-b)	Talk about the quality of the model – that is, state if this is a good model overall (e.g., R2, F-ratio test), and what other predictors that we didn’t include in our model might be associated with our dependent variable.
-Looking at the stepwise regression results, did the final model include all 4 predictors or were some dropped? What does that tell you about the quality of the model? 
-Looking at the cross-validation results, was the RMSE better for the 4 predictor model or the 2 predictor model?  
+In summary, in this report, we conducted a multiple regression to examine the relationship between median house value (the dependent variable) and four independent variables: vacancy rates (PCTVACANT), percentage of single-family housing (PCTSINGLES), educational attainment (PCTBACHMOR), and poverty levels (LNNBELPOV100). 
+
+Our findings show that all four predictors were statistically significant. Specifically, vacancy rates and poverty levels had a negative impact on median house value, while single-family housing and educational attainment had a positive influence. The fact that educational attainment was highly significant and positively related to house value is not surprising, as areas with higher education levels tend to attract higher-income households. Similarly, the negative effect of vacancy rates and poverty levels aligns with expectations, as these factors typically lower property values.
+
+The overall quality of the model was good, with an $R^2$ value of 0.6623, indicating that approximately 66% of the variance in median house value was explained by the predictors. Additionally, the F-ratio test, with its extremely low p-value, confirms that the model as a whole is statistically significant and that at least one predictor has a significant impact on the outcome. 
+
+Through stepwise regression results, all four predictors were retained in the final model. This indicates that each of these variables contributes meaningfully to explaining the variation in median house value, and none were deemed unnecessary based on the stepwise selection process.When examining the cross-validation results using RMSE (Root Mean Square Error), the four-predictor model generally showed a better fit compared to a simpler model with fewer predictors. This suggests that including all four predictors leads to more accurate predictions and better overall model performance. 
+
+While the four-predictor model shows better predictive accuracy, there are likely other variables that could enhance the model’s explanatory power if included. For instance, factors like crime rates, transportation accessibility, and proximity to amenities (such as parks, schools, and shopping centers) are commonly associated with housing values. Spatial autocorrelation, as suggested by the choropleth maps, indicates that house prices tend to cluster geographically—nearby properties often have similar values. This spatial dependency suggests that including neighborhood or location-based variables, or even applying spatial lag regression, could better capture the clustered nature of house prices. Housing values also depend on the characteristics of the house itself, such as age, size, storage options, and the presence of amenities like parking or green space. Additionally, local environmental factors, such as proximity to high-crime areas or noise pollution, can impact property values. Yet, many of these variables are often correlated with each other (e.g., transportation access and crime rates), so care must be taken in selecting which predictors to include to avoid multicollinearity. 
+
+In addition to this limitation of not including some potentially important predictors, we have to acknowledge there are some other limitations in terms of meeting the regression assumptions. One key assumption of OLS regression is that linear relationships exist between the dependent and independent variables. While the scatter plots showed that PCTBACHMOR had a clear linear relationship with median house value, the relationships for PCTVACANT, PCTSINGLES, and LNNBELPOV100 were more complex and not entirely linear. This suggests that the model may not fully capture the underlying dynamics of these predictors and their impact on house values. 
+
+
+Another key assumption is the independence of observations, which is violated due to spatial autocorrelation. This suggests that the model may not fully account for the spatial dependencies in the data, which could lead to biased parameter estimates and inaccurate predictions. To address this limitation, future analyses could explore spatial regression techniques, such as spatial lag or spatial error models, to account for spatial autocorrelation and improve model performance.
+
+independence of observations
+
+
 
 
 c)	If you haven’t done that in the Results section, talk explicitly about the limitations of the model – that is, mention which assumptions were violated, and if applicable, how that may affect the model/parameter estimation/estimated significance. 
 In addition, talk about the limitations of using the NBELPOV100 variable as a predictor – that is, what are some limitations of using the raw number of households living in poverty rather than a percentage?
 
 
-d)	Would it make sense to run Ridge or LASSO regression here? Explain briefly (~4-5 sentences) what these methods are, when they’re used, and why they would or would not be appropriate here.
+
+**Would it make sense to run Ridge or LASSO regression here? Explain briefly (~4-5 sentences) what these methods are, when they’re used, and why they would or would not be appropriate here.**
+
+
+Ridge and LASSO regression are regularization techniques used to address multicollinearity and overfitting in models with many predictors. Ridge regression penalizes the size of the coefficients, shrinking them towards zero but keeping all predictors in the model, which is useful when all predictors are believed to contribute to the outcome. LASSO (Least Absolute Shrinkage and Selection Operator) goes a step further by forcing some coefficients to be exactly zero, effectively performing variable selection.
+
+In this case, since the stepwise regression suggests that all four predictors significantly contribute to the model, there’s no strong indication of multicollinearity or overfitting. Therefore, Ridge or LASSO might not be necessary here unless there is evidence of high multicollinearity or many more predictors. If the model were more complex or had a larger number of predictors, LASSO could help in selecting the most important ones, while Ridge could help shrink coefficients to prevent overfitting.
+
 
 
 # References
