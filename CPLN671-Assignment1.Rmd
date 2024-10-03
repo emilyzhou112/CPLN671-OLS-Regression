@@ -355,13 +355,6 @@ reg_data %>%
 
 The choropleth maps of the dependent variable and the predictor variables reveal several notable patterns. In particular, the map of median house values shows higher values in the northwest Philadelphia and center city while lower values in the south and west of Philadelphia. This pattern is consistent with the distribution of single house units and the percentage of individuals with a bachelor's degree or higher, which also exhibit higher concentrations in the northwest and center city. In contrast, the maps of households living in poverty and vacant housing units show higher concentrations in the north, west, and parts of the south of Philadelphia. These patterns suggest an inverse relationship between poverty and vacant housing with educational attainment and single-family homeownership. It also appears that there might some degree of multicolinearity between percentage of population with a bachelor's degree or higher and percentage of single family units, given that they share similar spatial patterns. 
 
-
-
-Although some pairs of independent variables share general spatial patterns, they do not appear to be strongly correlated, and no severe multicollinearity is assumed. The correlation matrix validates this assumption, as no predictor pairs show very high correlations. 
-
-Moreover, the dependent variable, median housing value, appears to follow a pattern similar to educational attainment and single-family homeownership, while demonstrating an opposite trend to poverty and vacant housing. Based on these visualizations, we can expect educational attainment, specifically the percentage of individuals with a bachelor's degree or higher, to have the strongest association with the dependent variable, as these maps exhibit the most similar patterns.
-
-
 ```{r read in shapefile, message=FALSE, warning=FALSE, include=FALSE}
 
 philly <- st_read(here("data","shapefile", "RegressionData.shp"))
@@ -467,6 +460,9 @@ map_pctvacant + map_pctsingles + map_pcbachmore + map_lnbelpov100 +
   plot_layout(ncol = 2)
 ```
 
+The correlation matrix supports our observations from the map. There's a positive linear relationship between the percentage of people with at least a Bachelor's Degree or higher and the percentage of single-family units, with a correlation coefficient of 0.2. The percentage of households living below the poverty line also positively correlated with the percentage of vacant houses, with a correlation coefficient of 0.25. These correlations suggest that the predictors are related to each other, but since none of these correlations exceed 0.8, we can proceed with the regression analysis without concerns about multicollinearity.
+ 
+
 ```{r corr plot, message=FALSE, warning=FALSE}
 
 custom_labels <- c(
@@ -494,31 +490,33 @@ ggcorrplot(cor_matrix,
 ```
 
 
+## Regression Results
 
-## Regression Results - Emma
-*Present the regression output from R. Be sure that your output presents the parameter estimates (and associated standard errors, t-statistics and p-values), as well as the R2, the adjusted R2, and the relevant F-ratio and associated p-value.
+*Present the regression output from R. Be sure that your output presents the parameter estimates (and associated standard errors, t-statistics and p-values), as well as the R2, the adjusted R2, and the relevant F-ratio and associated p-value.*
 
-*Referencing the regression output in (i) above, interpret the results as in the example included above this report outline.
+*Referencing the regression output in (i) above, interpret the results as in the example included above this report outline.*
 
-Four independent variables, the proportion of vacant housing units (PCTVACANT), the proportion of single-family detached homes (PCTSINGLES), the proportion of residents with at least a Bachelor's degree (PCTBACHMOR), and the number of log-transformed households living below the poverty line (LNNBELPOV100), were used to construct ordinary least squares (OLS) regression models to predict the median log-transformed home values (LNMEDHVAL) for the Philadelphia census block group. The results of the regression analysis reveal a link between these block characteristics and house prices.
+### Parameter Estimates
+
+Four independent variables, the proportion of vacant housing units (PCTVACANT), the proportion of single-family detached homes (PCTSINGLES), the proportion of residents with at least a Bachelor's degree (PCTBACHMOR), and the number of log-transformed households living below the poverty line (LNNBELPOV100), were regressed to predict the median log-transformed home values (LNMEDHVAL) for the Philadelphia census block group. 
+
+The regression output tells us that the median home values are highly significant and are associated with the proportion of single-family detached homes(PCTSINGLES), the proportion of residents with at least a Bachelor's degree (PCTBACHMOR), the proportion of vacant housing units (PCTVACANT), and the number of log-transformed households living below the poverty line (LNNBELPOV100), with $p < 0.001$ for all predictors.
+
+As the proportions of vacant housing units (PCTVACANT) goes up by one unit (i.e.percentage point), the expected change in median home value is $(e^{\beta} - 1) \times 100\% = (e^{-0.0191569} - 1) \times 100\% \approx -1.897\% $. That is, as percentage of population living in poverty goes up by 1 unit (1%), median home value goes down by approximately 1.897%, holding other predictors constant. The p-value of of less than 0.0001 for PCTVACANT tells us that if there is actually no relationship between PCTVACANT and the dependent variable (i.e., if the null hypothesis that \( \beta_1 = 0 \) is actually true), then the probability of getting a \( \beta_1 \) coefficient estimate of -0.0191569 is less than 0.0001.
+
+Similarly, as the proportion of single-family detached homes (PCTSINGLES) goes up by one unit (i.e.percentage point), the expected change in median home value is $(e^{\beta} - 1) \times 100\% = (e^{0.0029769} - 1) \times 100\% \approx 0.298\% $. That is, as percentage of population living in poverty goes up by 1 unit (1%), median home value goes up by approximately 0.298%, holding other predictors constant. The p-value of of less than 0.0001 for PCTSINGLES tells us that if there is actually no relationship between PCTSINGLES and the dependent variable (i.e., if the null hypothesis that \( \beta_2 = 0 \) is actually true), then the probability of getting a \( \beta_2 \) coefficient estimate of 0.0029769 is less than 0.0001.
+
+Moreover, as the proportion of people with a Bachelor's degree or higher (PCTBACHMOR) goes up by one unit (i.e.percentage point), the expected change in median home value is $(e^{\beta} - 1) \times 100\% = (e^{0.0209098} - 1) \times 100\% \approx 2.11\% $. That is, as percentage of population with a Bachelor's degree or higher goes up by 1 unit (1%), median home value goes up by approximately 2.1%, holding other predictors constant. The p-value of of less than 0.0001 for PCTBACHMOR tells us that if there is actually no relationship between PCTBACHMOR and the dependent variable (i.e., if the null hypothesis that \( \beta_3 = 0 \) is actually true), then the probability of getting a \( \beta_3 \) coefficient estimate of 0.0209098 is less than 0.0001.
+
+And finally, as the number of log-transformed households living below the poverty line (LNNBELPOV100) changes by 1%, the expected value of median home value changes by $(1.01^{\beta} - 1) \times 100\% = (1.01^{-0.0789054} - 1) \times 100\%  \approx -0.078\%$. That is, as the number of households living below the poverty line goes up 1%, median home value changes by -0.078%, holding % in other predictors constant. The p-value of of less than 0.0001 for LNNBELPOV100 tells us that if there is actually no relationship between LNNBELPOV100 and the dependent variable (i.e., if the null hypothesis that \( \beta_4 = 0 \) is actually true), then the probability of getting a \( \beta_4 \) coefficient estimate of -0.0789054 is less than 0.0001.
+
+All of these low probabilities indicate that we can safely reject $H_0: \beta_1 = 0$ for $H_a: \beta_1 \neq 0$, $H_0: \beta_2 = 0$ for $H_a: \beta_2 \neq 0$, $H_0: \beta_3 = 0$ for $H_a: \beta_3 \neq 0$, and $H_0: \beta_4 = 0$ for $H_a: \beta_4 \neq 0$ (at most reasonable levels of $\alpha = P(\text{Type I error})$).
+
+### Model Fit
 
 The residuals from the model show a fairly reasonable distribution of errors, with a minimum residual value of -2.26, a first quartile of -0.20, a median of 0.04, a third quartile of 0.22, and a maximum value of 2.24. This distribution suggests that the model captures changes in housing values reasonably well, although some of the extreme residuals suggest that outliers may exist.
 
-The regression coefficients provide further evidence of the effect of each predictor on LNMEDHVAL. The intercept of the model is 11.11 (p < 0.001), indicating the expected log-transformed median home value when all predictors are held constant at zero. The proportion of vacant housing units (PCTVACANT) had a highly significant negative effect on LNMEDHVAL (β = -0.019, p < 0.001), suggesting that the higher the vacancy rate, the lower the median housing value. Specifically, for every 1% increase in vacant housing units, the log-transformed median home value decreases by 0.019 units, highlighting the negative impact of vacancy on property values.
-
-The proportion of single-family detached homes (PCTSINGLES) is significantly and positively correlated with LNMEDHVAL (β = 0.003, p < 0.001). This suggests that neighbourhoods with more single-family homes tend to have higher median housing values. Although the effect size is small, it is still statistically significant, suggesting that the presence of single-family homes contributes positively to community home values.
-
-The proportion of residents with at least a bachelor's degree (PCTBACHMOR) has the largest positive effect on LNMEDHVAL (β = 0.021, p < 0.001), suggesting that populations with higher levels of educational attainment tend to reside in areas with higher housing values. Each 1 percent increase in the proportion of residents with a bachelor's degree is associated with a 0.021 unit increase in the log-transformed median home value, underscoring the importance of educational attainment as a key factor in housing market dynamics.
-
-In contrast, the number of log-transformed households living below the poverty line (LNNBELPOV100) is negatively correlated with LNMEDHVAL (β = -0.079, p < 0.001). This result suggests that higher levels of poverty are associated with lower home values in a neighbourhood group, with each 1 per cent increase in the number of households below the poverty line being associated with a 0.079 unit decrease in the median log-transformed home value.
-
-The model had a multiple R-squared value of 0.6623 and an adjusted R-squared value of 0.6615, indicating that approximately 66% of the variance in LNMEDHVAL is explained by the four predictors. The F-statistic for this model was 840.9 (p < 0.001), further confirming the statistical significance of the model as a whole, and the fact that the predictors collectively explain a significant portion of the variance in housing values for the Philadelphia block group.
-
-The analysis of variance (ANOVA) table provides additional insight into the significance of each predictor in explaining the variation in LNMEDHVAL. The ANOVA decomposes the total variation in LNMEDHVAL into components attributable to each predictor and residual error. For PCTVACANT, the sum of squares is 180.39, with a mean square value of 180.39, and an F-statistic of 1343.09 (p < 0.001). This result confirms that housing vacancy is a significant factor contributing to the variation in housing values. Similarly, PCTSINGLES has a sum of squares of 24.54 and an F-statistic of 182.73 (p < 0.001), confirming the significant, though smaller, positive effect of single-family homes on housing values.
-
-The PCTBACHMOR variable is the strongest predictor, with a sum of squares of 235.12 and an F-statistic of 1750.55 (p < 0.001). This reinforces the importance of educational attainment in driving housing values. Lastly, LNNBELPOV100 has a sum of squares of 11.69 and an F-statistic of 87.05 (p < 0.001), showing that poverty levels, while statistically significant, have a more modest effect compared to other predictors.
-
-The residual sum of squares, which represents the unexplained variation in the model, was 230.34, with a mean square error of 0.134.Overall, the ANOVA results, combined with the OLS regression results, confirmed that all four predictors-PCTVACANT, PCTSINGLES, PCTBACHMOR, and LNNBELPOV100-contribute significantly to explaining the changes in LNMEDHVAL were all significant contributors. These findings provide strong evidence of the robustness of the model and the relevance of neighbourhood characteristics in predicting housing values.
+The model had a multiple R-squared value of 0.6623 and an adjusted R-squared value of 0.6615, indicating that approximately 66% of the variance in LNMEDHVAL is explained by the four predictors. The F-statistic for this model was 840.9 (p < 0.001), further confirming the statistical significance of the model as a whole.
 
 ```{r linear regression, message=FALSE, warning=FALSE}
 
@@ -526,6 +524,9 @@ fit <- lm(LNMEDHVAL ~ PCTVACANT + PCTSINGLES + PCTBACHMOR + LNNBELPOV100, data=r
 summary(fit)
 ```
 
+The analysis of variance (ANOVA) table provides additional insight into the significance of each predictor in explaining the variation in LNMEDHVAL. For example, the sum of squares for PCTVACANT is 180.392. This value represents the variation in LNMEDHVAL that can be attributed to changes in the percentage of vacant housing units. A higher sum of squares indicates a stronger relationship between the predictor and the response variable. The sum of squares for PCTSINGLES is 24.543, showing that the percentage of single-parent households also contributes to explaining the variation in LNMEDHVAL, though to a lesser extent than PCTVACANT. The sum of squares for PCTBACHMOR is 235.118, indicating that the percentage of residents with a bachelor's degree or higher explains a significant portion of the variance in LNMEDHVAL, more than the previous two predictors. This reinforces the importance of educational attainment in driving housing values. Lastly, the sum of squares for LNNBELPOV100 is 11.692, suggesting that while this predictor does contribute to explaining LNMEDHVAL, its impact is comparatively smaller than the others. 
+
+The total sum of squares, which represents the unexplained variation in the model, is 230.34, with a mean square error of 0.134.Overall, the ANOVA results, combined with the OLS regression results, confirmed that all four predictors-PCTVACANT, PCTSINGLES, PCTBACHMOR, and LNNBELPOV100-contribute significantly to explaining the changes in LNMEDHVAL were all significant contributors. These findings provide strong evidence of the robustness of the model and the relevance of neighbourhood characteristics in predicting housing values.
 
 ```{r anova table, message=FALSE, warning=FALSE}
 
@@ -534,12 +535,14 @@ anova_table
 
 ```
 
-
 ## Regression Assumption Check - Emma
 
 *First state that in this section, you will be talking about testing model assumptions. State that you have already looked at the variable distributions earlier.
 
 *Present scatter plots of the dependent variable and each of the predictors.  State whether each of the relationships seems to be linear, as assumed by the regression model. [Hint: they will not look linear.]
+
+In this section, 
+
 
 The scatter plot for PCTVACANT shows a general negative relationship between the proportion of vacant housing units and LNMEDHVAL. In the graph, there are clusters of block groups where high vacancy rates correspond to lower housing values, particularly on the left side of the plot where the values of LNMEDHVAL are higher. However, the plot is not perfectly linear. Instead, it reveals a more complex relationship with significant variation in housing values across different vacancy rates. In the middle and lower ranges of vacancy rates, the decline in housing values becomes less pronounced. This suggests that while vacant housing is associated with lower property values, the impact diminishes or becomes less predictable as the vacancy rate changes.
 
@@ -712,6 +715,7 @@ philly %>%
 
 
 ```
+
 
 ## Additional Analyses - Ziyi
 
