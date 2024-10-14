@@ -17,9 +17,11 @@ editor_options:
     wrap: sentence
 ---
 
-Version 2.0 \| First Created Sep 26, 2024 \| Updated Oct 4, 2024
+Version 3.0 \| First Created Sep 26, 2024 \| Updated Oct 14, 2024
 
 Keywords: Ordinary Least Square Regression, K-fold Cross Validation, Sum of Square Errors, Root Mean Squared Error, Stepwise AIC
+
+GitHub Repository: [CPLN671-OLS-Regression](https://github.com/emilyzhou112/CPLN671-OLS-Regression)
 
 
 ```{r setup, include=FALSE}
@@ -213,7 +215,7 @@ $$ \text{MSE} = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 $$
 And the root mean square error (RMSE) is the square root of the MSE: 
 
 $$
-\text{RMSE} = \sqrt{\text{MSE}}
+\text{RMSE} = \sqrt{\frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2}
 $$
 
 ## Software and Pacakges 
